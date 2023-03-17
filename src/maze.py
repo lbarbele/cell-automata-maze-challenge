@@ -15,7 +15,7 @@ class Maze():
     self.cols = shape[1]
 
     self.start = (0, 0) if start is None else start
-    self.finish = (-1, -1) if finish is None else finish
+    self.finish = (shape[0]-1, shape[1]-1) if finish is None else finish
 
     self.maze = np.full(shape, WHITE)
     self.maze[self.start] = START
@@ -136,3 +136,30 @@ class Maze():
           return True, path, itry+1
     
     return False, None, tries
+
+  def solve(self, starting_position: tuple[int, int] = None, max_steps: int = 100):
+    if starting_position is None:
+      starting_position = self.start
+
+    # in case the position is the end tile (just in case)
+    if self.maze[starting_position] == FINISH:
+      return True
+
+    mz = self.clone()
+
+    survival_paths = [[(starting_position)]]
+
+    for i in range(1, max_steps):
+      next_survival_paths = []
+      ending_points = []
+      for path in survival_paths:
+        for move in mz.get_valid_moves(path[-1]):
+          if move == self.finish:
+            return path + [move]
+          if not move in ending_points:
+            next_survival_paths.append(path + [move])
+            ending_points.append(move)
+      survival_paths = next_survival_paths
+      mz.evolve()
+
+    return None
