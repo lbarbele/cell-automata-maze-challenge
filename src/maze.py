@@ -9,10 +9,8 @@ START = 3
 FINISH = 4
 
 class Maze():
-  def __init__(self, shape_or_matrix: tuple[int, int], start: tuple[int, int] = None, finish: tuple[int, int] = None, greens: list[tuple[int, int]] = []):
-    if isinstance(shape_or_matrix, np.ndarray) and len(shape_or_matrix.shape) == 2:
-      matrix = shape_or_matrix
-
+  def __init__(self, matrix = None, shape: tuple[int, int] = None, start: tuple[int, int] = None, finish: tuple[int, int] = None, greens: list[tuple[int, int]] = []):
+    if isinstance(matrix, np.ndarray) and len(matrix.shape) == 2:
       self.maze = matrix
       self.shape = matrix.shape
       self.rows = matrix.shape[0]
@@ -36,9 +34,7 @@ class Maze():
         elif cell_type != WHITE and cell_type != GREEN:
           raise RuntimeError(f'invalid cell type {cell_type} at position {pos}')
 
-    else:
-      shape = shape_or_matrix
-
+    elif not shape is None:
       self.shape = shape
       self.rows = shape[0]
       self.cols = shape[1]
@@ -52,8 +48,11 @@ class Maze():
       for ij in greens:
         self.maze[ij] = GREEN
 
+    else:
+      raise RuntimeError('can not construct maze :(')
+
   def clone(self):
-    return Maze(self.shape, self.start, self.finish, self.get_cell_indices(GREEN))
+    return Maze(self.maze)
 
   def get_cell_indices(self, cell_type):
     return [pos for pos, c in np.ndenumerate(self.maze) if c == cell_type]
