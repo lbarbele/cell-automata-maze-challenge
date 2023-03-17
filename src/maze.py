@@ -9,19 +9,48 @@ START = 3
 FINISH = 4
 
 class Maze():
-  def __init__(self, shape: tuple[int, int], start: tuple[int, int] = None, finish: tuple[int, int] = None, greens: list[tuple[int, int]] = []):
-    self.shape = shape
-    self.rows = shape[0]
-    self.cols = shape[1]
+  def __init__(self, shape_or_matrix: tuple[int, int], start: tuple[int, int] = None, finish: tuple[int, int] = None, greens: list[tuple[int, int]] = []):
+    if isinstance(shape_or_matrix, np.ndarray) and len(shape_or_matrix.shape) == 2:
+      matrix = shape_or_matrix
 
-    self.start = (0, 0) if start is None else start
-    self.finish = (shape[0]-1, shape[1]-1) if finish is None else finish
+      self.maze = matrix
+      self.shape = matrix.shape
+      self.rows = matrix.shape[0]
+      self.cols = matrix.shape[1]
 
-    self.maze = np.full(shape, WHITE, dtype = int)
-    self.maze[self.start] = START
-    self.maze[self.finish] = FINISH
-    for ij in greens:
-      self.maze[ij] = GREEN
+      # find start/ending points (also check input)
+      self.start = None
+      self.finish = None
+
+      for pos, cell_type in np.ndenumerate(matrix):
+        if cell_type == START:
+          if self.start is None:
+            self.start = pos
+          else:
+            raise RuntimeError('more than one starting point found')
+        elif cell_type == FINISH:
+          if self.finish is None:
+            self.finish = pos
+          else:
+            raise RuntimeError('more than one ending point found')
+        elif cell_type != WHITE and cell_type != GREEN:
+          raise RuntimeError(f'invalid cell type {cell_type} at position {pos}')
+
+    else:
+      shape = shape_or_matrix
+
+      self.shape = shape
+      self.rows = shape[0]
+      self.cols = shape[1]
+
+      self.start = (0, 0) if start is None else start
+      self.finish = (shape[0]-1, shape[1]-1) if finish is None else finish
+
+      self.maze = np.full(shape, WHITE, dtype = int)
+      self.maze[self.start] = START
+      self.maze[self.finish] = FINISH
+      for ij in greens:
+        self.maze[ij] = GREEN
 
   def clone(self):
     return Maze(self.shape, self.start, self.finish, self.get_cell_indices(GREEN))
