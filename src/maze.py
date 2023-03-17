@@ -5,8 +5,8 @@ import numpy as np
 
 WHITE = 0
 GREEN = 1
-START = 2
-FINISH = 3
+START = 3
+FINISH = 4
 
 class Maze():
   def __init__(self, shape: tuple[int, int], start: tuple[int, int] = None, finish: tuple[int, int] = None, greens = list[tuple[int, int]]):
