@@ -17,7 +17,7 @@ class Maze():
     self.start = (0, 0) if start is None else start
     self.finish = (shape[0]-1, shape[1]-1) if finish is None else finish
 
-    self.maze = np.full(shape, WHITE)
+    self.maze = np.full(shape, WHITE, dtype = int)
     self.maze[self.start] = START
     self.maze[self.finish] = FINISH
     for ij in greens:
@@ -77,7 +77,7 @@ class Maze():
       return WHITE
   
   def evolve(self, overwrite = True):
-    other = np.full(self.maze.shape, WHITE)
+    other = np.full(self.maze.shape, WHITE, dtype = int)
 
     for pos in np.ndindex(self.shape):
       other[pos] = self.get_mutation(pos)
