@@ -71,7 +71,7 @@ class Maze():
     ngreen = self.count_green_neighbours(position)
     if type == WHITE and (ngreen == 2 or ngreen == 3):
       return GREEN
-    elif type == GREEN and ngreen >= 4:
+    elif type == GREEN and ngreen >= 4 and ngreen < 7:
       return GREEN
     else:
       return WHITE
