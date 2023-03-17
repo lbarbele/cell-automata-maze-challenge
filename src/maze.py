@@ -9,7 +9,7 @@ START = 3
 FINISH = 4
 
 class Maze():
-  def __init__(self, shape: tuple[int, int], start: tuple[int, int] = None, finish: tuple[int, int] = None, greens = list[tuple[int, int]]):
+  def __init__(self, shape: tuple[int, int], start: tuple[int, int] = None, finish: tuple[int, int] = None, greens: list[tuple[int, int]] = None):
     self.shape = shape
     self.rows = shape[0]
     self.cols = shape[1]
@@ -22,7 +22,7 @@ class Maze():
     self.maze[self.finish] = FINISH
     for ij in greens:
       self.maze[ij] = GREEN
-
+    
   def clone(self):
     return Maze(self.shape, self.start, self.finish, self.get_cell_indices(GREEN))
 
