@@ -165,7 +165,7 @@ class Maze():
     
     return False, None, tries
 
-  def solve(self, starting_position: tuple[int, int] = None, max_steps: int = 100):
+  def solve(self, starting_position: tuple[int, int] = None, max_steps: int = 100, verbose = False):
     if starting_position is None:
       starting_position = self.start
 
@@ -189,5 +189,8 @@ class Maze():
             ending_points.append(move)
       survival_paths = next_survival_paths
       mz.evolve()
+
+      if verbose:
+        print(f'step: {i-1}, paths: {len(survival_paths)}')
 
     return None
