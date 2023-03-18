@@ -2,6 +2,7 @@ from __future__ import annotations
 import math
 import random
 
+import matplotlib.animation as anm
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -128,7 +129,7 @@ class Maze():
     
     return count
 
-  def draw(self, position: Position = None, ms: int = 20) -> None:
+  def draw(self, position: Position = None, ms: int = 20, fignum: int = None) -> None:
     """
     Draw the maze using ```matplotlib```'s ```matshow``` method. If a position is given
     as argument, a cursor is drawn at such position and all possible valid moves are
@@ -137,12 +138,13 @@ class Maze():
     Arguments:
     - ```position: tuple[int, int]```: cursor position
     - ```ms: int```: cursor size
+    - ```fignum: int or None```: forwarded to ```matshow```
 
     Returns: a ```matplotlib.image.AxesImage``` object (returned from ```plt.matshow```)
     """
 
     # draw the maze's cell matrix using pyplot's matshow method
-    axes_image = plt.matshow(self.maze, cmap = 'tab10')
+    axes_image = plt.matshow(self.maze, cmap = 'tab10', fignum = fignum)
 
     # if a cursor position is given, draw it
     if not (position is None):
@@ -160,6 +162,30 @@ class Maze():
 
     # forward the object returned by matshow
     return axes_image
+
+  def draw_animation(self, path: list[Position] = None, steps: int = None, ms: int = 20):
+
+    if path is not None:
+      init = lambda: maze_copy.draw(position = path[0], fignum = figure.number, ms = ms)
+      func = lambda pos: maze_copy.evolve().draw(position = pos, fignum = figure.number, ms = ms)
+    elif steps is not None:
+      init = lambda: maze_copy.draw(fignum = figure.number, ms = ms)
+      func = lambda pos: maze_copy.evolve().draw(fignum = figure.number, ms = ms)
+    else:
+      raise RuntimeError('one of "steps" or "path" must be defined')
+
+    maze_copy = self.clone()
+    figure = plt.figure()
+    animation = anm.FuncAnimation(
+      figure,
+      func = func,
+      init_func = init,
+      frames = path[1:],
+      repeat = False,
+      interval = 20,
+    )
+
+    return animation
   
   def evolve(self, overwrite: bool = True) -> Maze:
     """
