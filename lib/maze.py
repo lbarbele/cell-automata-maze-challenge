@@ -3,12 +3,22 @@ import math
 import random
 
 import matplotlib.animation as anm
+import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 from .cell import Cell
 
 Position = tuple[int, int]
+
+maze_cmap = clr.ListedColormap([
+  [1.        , 1.        , 1.        , 1.        ],
+  [0.36862745, 0.93333333, 0.38823529, 1.        ],
+  [0.36862745, 0.93333333, 0.38823529, 1.        ],
+  [0.36862745, 0.38039216, 0.94901961, 1.        ],
+  [0.88627451, 0.32156863, 0.20784314, 1.        ]
+])
 
 class Maze():
   """
@@ -85,19 +95,6 @@ class Maze():
     
     return i
 
-  @staticmethod
-  def from_file(path: str) -> Maze:
-    """
-    Create maze by reading a file containing cell information.
-
-    Arguments:
-    - ```path: str```: matrix of cells in text format (only numbers)
-
-    Returns: ```Maze```
-    """
-    matrix = np.loadtxt(path, dtype = int)
-    return Maze(matrix)
-
   def clone(self) -> Maze:
     """
     Returns a deep clone of this maze.
@@ -144,7 +141,7 @@ class Maze():
     """
 
     # draw the maze's cell matrix using pyplot's matshow method
-    axes_image = plt.matshow(self.maze, cmap = 'tab10', fignum = fignum)
+    axes_image = plt.matshow(self.maze, cmap = maze_cmap, fignum = fignum)
 
     # if a cursor position is given, draw it
     if not (position is None):
@@ -227,6 +224,19 @@ class Maze():
     else:
       # if overwrite is invalid
       raise RuntimeError('invalid overwrite parameter value')
+
+  @staticmethod
+  def from_file(path: str) -> Maze:
+    """
+    Create maze by reading a file containing cell information.
+
+    Arguments:
+    - ```path: str```: matrix of cells in text format (only numbers)
+
+    Returns: ```Maze```
+    """
+    matrix = np.loadtxt(path, dtype = int)
+    return Maze(matrix)
 
   def get_cell_indices(self, cell_type: Cell) -> list[Position]:
     """
