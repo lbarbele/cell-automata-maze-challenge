@@ -370,9 +370,10 @@ class Maze():
             shortest_dist = dist
         print(f'step: {i-1}, paths: {len(survival_paths)}, shortest distance to finish: {shortest_dist}')
 
+    # in case no path was found
     return None
   
-  def solve_random(self, position: Position = None, tries: int = 100) -> list[Position]:
+  def solve_random(self, position: Position = None, tries: int = 100, verbose: bool = False) -> list[Position]:
     """
     Naive approach to solving a maze: make a cursor walk randomly from the starting position,
     but taking into account only moves that will lead to a white cell. Eventually, if the cursor
@@ -393,23 +394,50 @@ class Maze():
     if self.maze[position] == Cell.FINISH:
       return [position]
 
-    mazes = [self]
+    # get a clone of this maze, so this maze will not be modified
+    mz = self.clone()
 
-    for itry in range(tries):
-      path = [position]
+    # this is a list of all random paths at a given step, except paths
+    # for which no moves are available
+    random_paths = [[position] for i in range(tries)]
 
-      while not path[-1] is None:
-        istep = len(path)
+    # iterate over walk steps until a solution is found or no more paths are available
+    istep = 1
 
-        if len(mazes) < istep:
-          mazes.append(mazes[-1].clone())
-          mazes[-1].evolve()
+    while len(random_paths) > 0:
+      # list of random paths after current step
+      next_random_paths = []
 
-        cur_maze = mazes[istep - 1]
-        cur_step = cur_maze.random_walk(path[-1])
-        path.append(cur_step)
+      # iterate over all random paths before the current step
+      # for each path, compute a random move from its last position.
+      # if the move leads to a finishing cell, then we are done: return the path
+      # otherwise, add path + move to the list of survival paths if path + move
+      for path in random_paths:
+        move = mz.random_walk(path[-1])
+        if move == self.finish:
+          # path to the ending cell found
+          return path + [move]
+        elif move is None:
+          # no moves available from path
+          continue
+        else:
+          # random path to white cell exists
+          next_random_paths.append(path + [move])
 
-        if cur_step == self.finish:
-          return path
-    
+      # update the list of random paths and evolve the maze
+      random_paths = next_random_paths
+      mz.evolve()
+
+      # dump information if verbose flag is enabled
+      if verbose:
+        shortest_dist = None
+        for path in random_paths:
+          cell = path[-1]
+          dist = math.hypot(cell[0] - self.finish[0], cell[1] - self.finish[1])
+          if shortest_dist is None or dist < shortest_dist:
+            shortest_dist = dist
+        print(f'step: {istep}, paths: {len(random_paths)}, shortest distance to finish: {shortest_dist}')
+        istep += 1
+
+    # in case no path was found
     return None
