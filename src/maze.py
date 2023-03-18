@@ -57,10 +57,10 @@ class Maze():
   def get_cell_indices(self, cell_type):
     return [pos for pos, c in np.ndenumerate(self.maze) if c == cell_type]
 
-  def draw(self, position: tuple[int, int] = None):
+  def draw(self, position: tuple[int, int] = None, ms = 20):
     plt.matshow(self.maze, cmap = 'tab10')
     if not (position is None):
-      plt.plot(position[1], position[0], 'kD', ms = 20)
+      plt.plot(position[1], position[0], 'kD', ms = ms)
       moves = np.array(self.get_valid_moves(position))
       if len(moves) > 0:
         plt.plot(moves[:, 1], moves[:, 0], 'k+')
