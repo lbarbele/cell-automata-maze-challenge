@@ -170,29 +170,28 @@ class Maze():
 
     Arguments:
     - ```path: list[Position]```: path to be animated
-    - ```steps: int```: number of steps to animate (ignored if path is given)
+    - ```steps: int```: number of steps to animate
     - ```ms: int```: marker size for drawing cursor positions
     - ```interval: int```: interval between frames
 
     Returns: ```matplotlib.animation.FuncAnimation``` object
     """
-
-    if path is not None:
-      init = lambda: maze_copy.draw(position = path[0], fignum = figure.number, ms = ms)
-      func = lambda pos: maze_copy.evolve().draw(position = pos, fignum = figure.number, ms = ms)
-    elif steps is not None:
-      init = lambda: maze_copy.draw(fignum = figure.number, ms = ms)
-      func = lambda pos: maze_copy.evolve().draw(fignum = figure.number, ms = ms)
-    else:
-      raise RuntimeError('one of "steps" or "path" must be defined')
-
-    maze_copy = self.clone()
+    if path is None and steps is None:
+      raise RuntimeError('at least one of steps or path must be given')
+    
+    steps = len(path) if path is not None else steps
+    mzplt = self.clone()
     figure = plt.figure()
+
+    def animate(i):
+      pos = None if path is None else path[i]
+      if i > 0: mzplt.evolve()
+      mzplt.draw(position = pos, fignum = figure.number, ms = ms)
+
     animation = anm.FuncAnimation(
       figure,
-      func = func,
-      init_func = init,
-      frames = path[1:],
+      func = animate,
+      frames = range(steps),
       repeat = False,
       interval = interval,
     )
