@@ -3,10 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 
-WHITE = 0
-GREEN = 1
-START = 3
-FINISH = 4
+from .cell import Cell
 
 class Maze():
   def __init__(self, matrix = None, shape: tuple[int, int] = None, start: tuple[int, int] = None, finish: tuple[int, int] = None, greens: list[tuple[int, int]] = []):
@@ -21,18 +18,21 @@ class Maze():
       self.finish = None
 
       for pos, cell_type in np.ndenumerate(matrix):
-        if cell_type == START:
+        if cell_type == Cell.START:
           if self.start is None:
             self.start = pos
           else:
             raise RuntimeError('more than one starting point found')
-        elif cell_type == FINISH:
+        elif cell_type == Cell.FINISH:
           if self.finish is None:
             self.finish = pos
           else:
             raise RuntimeError('more than one ending point found')
-        elif cell_type != WHITE and cell_type != GREEN:
+        elif cell_type != Cell.WHITE and cell_type != Cell.GREEN:
           raise RuntimeError(f'invalid cell type {cell_type} at position {pos}')
+        
+      if self.start is None or self.finish is None:
+        raise RuntimeError('input matrix is incomplete: missing start or finish tiles')
 
     elif not shape is None:
       self.shape = shape
@@ -42,19 +42,19 @@ class Maze():
       self.start = (0, 0) if start is None else start
       self.finish = (shape[0]-1, shape[1]-1) if finish is None else finish
 
-      self.maze = np.full(shape, WHITE, dtype = int)
-      self.maze[self.start] = START
-      self.maze[self.finish] = FINISH
+      self.maze = np.full(shape, Cell.WHITE, dtype = int)
+      self.maze[self.start] = Cell.START
+      self.maze[self.finish] = Cell.FINISH
       for ij in greens:
-        self.maze[ij] = GREEN
+        self.maze[ij] = Cell.GREEN
 
     else:
       raise RuntimeError('can not construct maze :(')
-
+    
   def clone(self):
     return Maze(self.maze)
 
-  def get_cell_indices(self, cell_type):
+  def get_cell_indices(self, cell_type: Cell):
     return [pos for pos, c in np.ndenumerate(self.maze) if c == cell_type]
 
   def draw(self, position: tuple[int, int] = None, ms = 20):
@@ -85,7 +85,7 @@ class Maze():
     count = 0
 
     for ij in self.get_neighbours(position):
-      if self.maze[ij] == GREEN:
+      if self.maze[ij] == Cell.GREEN:
         count += 1
     
     return count
@@ -93,19 +93,19 @@ class Maze():
   def get_mutation(self, position: tuple[int, int]):
     type = self.maze[position]
 
-    if type == START or type == FINISH:
+    if type == Cell.START or type == Cell.FINISH:
       return type
     
     ngreen = self.count_green_neighbours(position)
-    if type == WHITE and (1 < ngreen and ngreen < 5):
-      return GREEN
-    elif type == GREEN and (3 < ngreen and ngreen < 6):
-      return GREEN
+    if type == Cell.WHITE and (1 < ngreen and ngreen < 5):
+      return Cell.GREEN
+    elif type == Cell.GREEN and (3 < ngreen and ngreen < 6):
+      return Cell.GREEN
     else:
-      return WHITE
+      return Cell.WHITE
   
-  def evolve(self, overwrite = True):
-    other = np.full(self.maze.shape, WHITE, dtype = int)
+  def evolve(self, overwrite: bool = True):
+    other = np.full(self.maze.shape, Cell.WHITE, dtype = int)
 
     for pos in np.ndindex(self.shape):
       other[pos] = self.get_mutation(pos)
@@ -119,11 +119,11 @@ class Maze():
     if position is None:
       position = self.start
 
-    if self.maze[position] == GREEN:
+    if self.maze[position] == Cell.GREEN:
       return []
     
     nb = self.get_neighbours(position, include_diag = False)
-    valid_moves = [ij for ij in nb if self.get_mutation(ij) != GREEN]
+    valid_moves = [ij for ij in nb if self.get_mutation(ij) != Cell.GREEN]
     return valid_moves
   
   def random_walk(self, position: tuple[int, int], evolve = False):
@@ -170,7 +170,7 @@ class Maze():
       starting_position = self.start
 
     # in case the position is the end tile (just in case)
-    if self.maze[starting_position] == FINISH:
+    if self.maze[starting_position] == Cell.FINISH:
       return True
 
     mz = self.clone()
