@@ -84,6 +84,19 @@ class Maze():
     
     return i
 
+  @staticmethod
+  def from_file(path: str) -> Maze:
+    """
+    Create maze by reading a file containing cell information.
+
+    Arguments:
+    - ```path: str```: matrix of cells in text format (only numbers)
+
+    Returns: ```Maze```
+    """
+    matrix = np.loadtxt(path, dtype = int)
+    return Maze(matrix)
+
   def clone(self) -> Maze:
     """
     Returns a deep clone of this maze.
