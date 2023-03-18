@@ -1,6 +1,7 @@
 from __future__ import annotations
 import math
 import random
+import typing
 
 import matplotlib.animation as anm
 import matplotlib.colors as clr
@@ -71,6 +72,28 @@ class Maze():
     if self.start is None or self.finish is None:
       raise RuntimeError('input matrix is incomplete: missing start or finish tiles')
     
+    # set the cell dynamics to be the default one (can be changed using set_dynamics)
+    self.dynamics = Maze.__default_dynamics
+    
+  @staticmethod
+  def __default_dynamics(ngreen, cell_type):
+    # start/finish cells do not change
+    if cell_type == Cell.START or cell_type == Cell.FINISH:
+      return cell_type
+    
+    # dynamics of green and white cells are defined here:
+    if cell_type == Cell.WHITE and (1 < ngreen and ngreen < 5):
+      # white cells turn green if they have a number of adjacent green cells
+      # greater than 1 and less than 5. Otherwise, they remain white.
+      return Cell.GREEN
+    elif cell_type == Cell.GREEN and (3 < ngreen and ngreen < 6):
+      # green cells remain green if they have a number of green adjacent cells
+      # greater than 3 and less than 6. Otherwise they become white.
+      return Cell.GREEN
+    else:
+      # all other cells become or remain white
+      return Cell.WHITE
+    
   def __validate_position(self, position: Position) -> Position:
     # check if position is a tuple of values
     if not isinstance(position, tuple) or len(position) != 2:
@@ -102,7 +125,9 @@ class Maze():
     
     Returns: a ```Maze``` object, clone if this maze
     """
-    return Maze(self.maze)
+    other = Maze(self.maze)
+    other.set_dynamics(self.dynamics)
+    return other
   
   def count_green_neighbours(self, position: Position) -> int:
     """
@@ -263,22 +288,8 @@ class Maze():
     ngreen = self.count_green_neighbours(position)
     cell_type = self.maze[position]
 
-    # start/finish cells do not change
-    if cell_type == Cell.START or cell_type == Cell.FINISH:
-      return cell_type
-    
-    # dynamics of green and white cells are defined here:
-    if cell_type == Cell.WHITE and (1 < ngreen and ngreen < 5):
-      # white cells turn green if they have a number of adjacent green cells
-      # greater than 1 and less than 5. Otherwise, they remain white.
-      return Cell.GREEN
-    elif cell_type == Cell.GREEN and (3 < ngreen and ngreen < 6):
-      # green cells remain green if they have a number of green adjacent cells
-      # greater than 3 and less than 6. Otherwise they become white.
-      return Cell.GREEN
-    else:
-      # all other cells become or remain white
-      return Cell.WHITE
+    # return value given by dynamics
+    return self.dynamics(ngreen = ngreen, cell_type = cell_type)
 
   def get_neighbours(self, position: Position, include_diag: bool = True) -> list[Position]:
     """
@@ -356,6 +367,26 @@ class Maze():
       self.evolve()
 
     return random.choice(moves)
+  
+  def set_dynamics(self, dynamics_function: typing.Callable):
+    """
+    Function to define cell dynamics. The given dynamics function must be a callable
+    compatible with the signature ```dynamics_function(ngreen: int, cell_type: Cell) -> Cell```.
+
+    Arguments:
+    - ```dynamics_functions: callable```: the new function describing the cell dynamics for this maze
+
+    Returns nothing.
+    """
+    for ct in [Cell.START, Cell.FINISH, Cell.WHITE, Cell.GREEN]:
+      for ng in range(9):
+        try:
+          ret = dynamics_function(ngreen = ng, cell_type = ct)
+          self.__validate_cell(ret)
+        except:
+          raise RuntimeError('given dynamics function is invalid')
+
+    self.dynamics = dynamics_function
 
   def solve(self, starting_position: Position = None, max_steps: int = 100, verbose: bool = False) -> list[Position] | None:
     """
