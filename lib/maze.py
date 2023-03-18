@@ -163,7 +163,19 @@ class Maze():
     # forward the object returned by matshow
     return axes_image
 
-  def draw_animation(self, path: list[Position] = None, steps: int = None, ms: int = 20):
+  def draw_animation(self, path: list[Position] = None, steps: int = None, ms: int = 20, interval: int = 200) -> anm.FuncAnimation:
+    """
+    Draw an animation of the maze in ```steps``` steps or wit ha cursor path, if
+    ```path``` is given.
+
+    Arguments:
+    - ```path: list[Position]```: path to be animated
+    - ```steps: int```: number of steps to animate (ignored if path is given)
+    - ```ms: int```: marker size for drawing cursor positions
+    - ```interval: int```: interval between frames
+
+    Returns: ```matplotlib.animation.FuncAnimation``` object
+    """
 
     if path is not None:
       init = lambda: maze_copy.draw(position = path[0], fignum = figure.number, ms = ms)
@@ -182,7 +194,7 @@ class Maze():
       init_func = init,
       frames = path[1:],
       repeat = False,
-      interval = 20,
+      interval = interval,
     )
 
     return animation
