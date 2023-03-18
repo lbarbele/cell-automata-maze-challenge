@@ -6,6 +6,11 @@ import numpy as np
 from .cell import Cell
 
 class Maze():
+  """
+  The Maze class represents a rectangular maze of cell automata and provides methods
+  to analyze its dynamics.
+  """
+
   def __init__(self, matrix: np.ndarray):
     # check input
     if not isinstance(matrix, np.ndarray):
