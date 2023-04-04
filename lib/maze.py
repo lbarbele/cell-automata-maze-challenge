@@ -451,6 +451,11 @@ class Maze():
     # get a clone of this maze, so this maze will not be modified
     mz = self.clone()
 
+    # compute neighbouring cells once for all cells
+    ngb = np.empty(shape = self.shape, dtype = object)
+    for pos in np.ndindex(self.shape):
+      ngb[pos] = self.get_neighbours(pos, include_diag = False)
+
     # this is a list of all survival paths at a given step
     # that is, paths that go only through dead cells
     survival_paths = [[(starting_position)]]
@@ -473,7 +478,7 @@ class Maze():
       # leads to a cell that no other path does (because we are not interested
       # in different paths that lead to the same position at the same step)
       for path in survival_paths:
-        for pos in self.get_neighbours(path[-1], include_diag = False):
+        for pos in ngb[path[-1]]:
           if pos == self.end:
             return path + [pos]
           elif mz.maze[pos] == Cell.LIVE:
