@@ -73,10 +73,6 @@ class Maze():
     
   @staticmethod
   def __default_dynamics(nlive, cell_type):
-    # start/end cells do not change
-    if cell_type == Cell.START or cell_type == Cell.END:
-      return cell_type
-    
     # cell dynamics are defined:
     if cell_type == Cell.DEAD and (1 < nlive and nlive < 5):
       # dead cells become alive if they have a number of adjacent live cells
@@ -228,12 +224,20 @@ class Maze():
     Returns: ```self``` if overwrite is enabled or a new ```Maze``` otherwise.
     """
 
+    # in what concerns cell dynamics, start/end cells count as dead
+    self.maze[self.start] = Cell.DEAD
+    self.maze[self.end] = Cell.DEAD
+
     # start with a maze of dead cells
     other = np.full(self.maze.shape, Cell.DEAD, dtype = int)
 
     # apply dynamics to every cell
     for pos in np.ndindex(self.shape):
       other[pos] = self.get_mutation(pos)
+
+    # restore start/end cells
+    other[self.start] = Cell.START
+    other[self.end] = Cell.END
 
     if overwrite == True:
       # if overwrite is enabled, change this maze and return it
