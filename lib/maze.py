@@ -52,21 +52,17 @@ class Maze():
     self.rows = self.shape[0]
     self.cols = self.shape[1]
 
-    # loop over cells to find start/end and check values
+    # check cells and search for start and finishing cells
     self.start = None
     self.finish = None
 
-    for pos, cell in np.ndenumerate(matrix):
-      if cell == Cell.START and self.start is None:
-        self.start = pos
-      elif cell == Cell.FINISH and self.finish is None:
-        self.finish = pos
-      elif cell == Cell.START and not (self.start is None):
-        raise RuntimeError('more than one starting point found in matrix')
-      elif cell == Cell.FINISH and not (self.finish is None):
-        raise RuntimeError('more than one finishing point found in matrix')
-      elif cell != Cell.WHITE and cell != Cell.GREEN:
-        raise RuntimeError(f'invalid cell found (value = {cell})')
+    for i, j in  zip(*np.where((self.maze != Cell.WHITE) & (self.maze != Cell.GREEN))):
+      if self.maze[i, j] == Cell.START and self.start is None:
+        self.start = (i, j)
+      elif self.maze[i, j] == Cell.FINISH and self.finish is None:
+        self.finish = (i, j)
+      else:
+        raise RuntimeError(f'bad cell at ({i}, {j})')
 
     # check if start and finish were found
     if self.start is None or self.finish is None:
