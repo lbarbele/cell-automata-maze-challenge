@@ -7,6 +7,7 @@ import matplotlib.animation as anm
 import matplotlib.colors as clr
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.sparse as sparse
 
 from .cell import Cell
 
@@ -46,30 +47,38 @@ class Maze():
     if len(matrix.shape) != 2:
       raise RuntimeError(f'input matrix has {len(matrix.shape)} dimensions whereas 2 were expected')
 
-    # copy the input matrix with integer dtype and retrieve its shape information
-    self.maze = np.array(matrix, dtype = int)
-    self.shape = self.maze.shape
-    self.rows = self.shape[0]
-    self.cols = self.shape[1]
+    # copy matrix as the current maze configuration
+    self.maze = np.array(matrix, dtype = np.int8)
 
-    # check cells and search for start and end cells
-    self.start = None
-    self.end = None
+    # check matrix and search for start and end positions
+    self.start, self.end = None, None
 
-    for i, j in  zip(*np.where((self.maze != Cell.DEAD) & (self.maze != Cell.LIVE))):
-      if self.maze[i, j] == Cell.START and self.start is None:
-        self.start = (i, j)
-      elif self.maze[i, j] == Cell.END and self.end is None:
-        self.end = (i, j)
+    for pos in zip(*np.where((matrix != Cell.DEAD) & (matrix != Cell.LIVE))):
+      if self.maze[pos] == Cell.START and self.start is None:
+        self.start = pos
+      elif self.maze[pos] == Cell.END and self.end is None:
+        self.end = pos
       else:
-        raise RuntimeError(f'bad cell at ({i}, {j})')
+        raise RuntimeError(f'bad cell at position {pos}')
 
-    # check if start and end tiles were found
+    # check if start and end positions were found
     if self.start is None or self.end is None:
       raise RuntimeError('input matrix is incomplete: missing start or end tiles')
-    
+
     # set the cell dynamics to be the default one (can be changed using set_dynamics)
     self.dynamics = Maze.__default_dynamics
+
+  @property
+  def cols(self):
+    return self.shape[1]
+
+  @property
+  def rows(self):
+    return self.shape[0]
+
+  @property
+  def shape(self):
+    return self.maze.shape
     
   @staticmethod
   def __default_dynamics(nlive, cell_type):
