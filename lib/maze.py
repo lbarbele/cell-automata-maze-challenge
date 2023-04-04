@@ -48,7 +48,7 @@ class Maze():
       raise RuntimeError(f'input matrix has {len(matrix.shape)} dimensions whereas 2 were expected')
 
     # copy matrix as the current maze configuration
-    self.maze = np.array(matrix, dtype = np.int8)
+    self.maze = np.array(matrix, dtype = int)
 
     # check matrix and search for start and end positions
     self.start, self.end = None, None
@@ -67,6 +67,13 @@ class Maze():
 
     # set the cell dynamics to be the default one (can be changed using set_dynamics)
     self.dynamics = Maze.__default_dynamics
+    self._has_custom_dynamics = False
+
+    # create the transformation matrices used to count neighbours
+    m, n = self.shape
+    self._mtx_a = sparse.diags([np.ones(m-1), np.ones(m-1)], offsets = [-1, 1], dtype = int)
+    self._mtx_b = sparse.diags([np.ones(n-1), np.ones(n), np.ones(n-1)], offsets = [-1, 0, 1], dtype = int)
+    self._mtx_c = sparse.diags([np.ones(n-1), np.ones(n-1)], offsets = [-1, 1], dtype = int)
 
   @property
   def cols(self):
@@ -127,7 +134,9 @@ class Maze():
     Returns: a ```Maze``` object, clone if this maze
     """
     other = Maze(self.maze)
-    other.set_dynamics(self.dynamics)
+    if self._has_custom_dynamics:
+      other.set_dynamics(self.dynamics)
+      other._has_custom_dynamics = True
     return other
   
   def count_live_neighbours(self, position: Position) -> int:
@@ -238,15 +247,27 @@ class Maze():
     self.maze[self.end] = Cell.DEAD
 
     # start with a maze of dead cells
-    other = np.full(self.maze.shape, Cell.DEAD, dtype = int)
+    other = np.full(self.shape, Cell.DEAD, dtype = int)
 
-    # apply dynamics to every cell
-    for pos in np.ndindex(self.shape):
-      other[pos] = self.get_mutation(pos)
+    if self._has_custom_dynamics:
+      for pos in np.ndindex(self.shape):
+        other[pos] = self.get_mutation(pos)
+    else:
+      # get the current configuration as a sparse matrix
+      mz = sparse.coo_matrix(self.maze)
+      # get a matrix with the neighbour count for every position
+      count = (self._mtx_a.dot(mz).dot(self._mtx_b) + mz.dot(self._mtx_c)).todense()
+      # get a boolean mask telling every cell that will be alive after the evolution
+      mask = ((self.maze == Cell.DEAD) & (1 < count) & (count < 5)) | ((self.maze == Cell.LIVE) & (3 < count) & (count < 6))
+      # set the new alive cells
+      other[mask] = Cell.LIVE
 
     # restore start/end cells
     other[self.start] = Cell.START
     other[self.end] = Cell.END
+
+    self.maze[self.start] = Cell.START
+    self.maze[self.end] = Cell.END
 
     if overwrite == True:
       # if overwrite is enabled, change this maze and return it
@@ -398,6 +419,7 @@ class Maze():
           raise RuntimeError('given dynamics function is invalid')
 
     self.dynamics = dynamics_function
+    self._has_custom_dynamics = True
 
   def solve(self, starting_position: Position = None, max_steps: int = 100, verbose: bool = False) -> list[Position] | None:
     """
