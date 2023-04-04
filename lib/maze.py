@@ -1,5 +1,4 @@
 from __future__ import annotations
-import math
 import random
 import typing
 
@@ -305,6 +304,9 @@ class Maze():
     ct = self.__validate_cell(cell_type)
     return list(zip(*np.where(self.maze == ct)))
   
+  def get_distance_to_end(self, pos: Position) -> int:
+    return abs(pos[0] - self.end[0]) + abs(pos[1] - self.end[1])
+  
   def get_mutation(self, position: Position) -> Cell:
     """
     Apply cell dynamics to determine how the cell at the given position will evolve.
@@ -483,7 +485,7 @@ class Maze():
             return path + [pos]
           elif mz.maze[pos] == Cell.LIVE:
             continue
-          elif not pos in ending_points:
+          elif pos not in ending_points:
             next_survival_paths.append(path + [pos])
             ending_points.append(pos)
 
@@ -492,12 +494,7 @@ class Maze():
 
       # dump information if verbose flag is enabled
       if verbose:
-        shortest_dist = None
-        for path in survival_paths:
-          cell = path[-1]
-          dist = math.hypot(cell[0] - self.end[0], cell[1] - self.end[1])
-          if shortest_dist is None or dist < shortest_dist:
-            shortest_dist = dist
+        shortest_dist = np.min([self.get_distance_to_end(path[-1]) for path in survival_paths])
         print(f'step: {i-1}, paths: {len(survival_paths)}, shortest distance to finish: {shortest_dist}')
 
     # in case no path was found
@@ -560,12 +557,7 @@ class Maze():
 
       # dump information if verbose flag is enabled
       if verbose:
-        shortest_dist = None
-        for path in random_paths:
-          cell = path[-1]
-          dist = math.hypot(cell[0] - self.end[0], cell[1] - self.end[1])
-          if shortest_dist is None or dist < shortest_dist:
-            shortest_dist = dist
+        shortest_dist = np.min([self.get_distance_to_end(path[-1]) for path in random_paths])
         print(f'step: {istep}, paths: {len(random_paths)}, shortest distance to finish: {shortest_dist}')
         istep += 1
 
