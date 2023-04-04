@@ -269,7 +269,7 @@ class Maze():
     Returns: a list of ```Position``` containing the positions of the given cell type.
     """
     ct = self.__validate_cell(cell_type)
-    return [p for p, c in np.ndenumerate(self.maze) if c == ct]
+    return list(zip(*np.where(self.maze == ct)))
   
   def get_mutation(self, position: Position) -> Cell:
     """
