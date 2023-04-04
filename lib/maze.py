@@ -36,8 +36,8 @@ class Maze():
   def __init__(self, matrix: np.ndarray):
     """
     Maze constructor: takes a cell matrix as input, whose values will be checked. The
-    matrix is required to contain exactly one starting and one finishing cell. It is
-    also required that all cell values are valid (i.e. can be converted to the enum Cell).
+    matrix is required to contain exactly one starting and one end cell. It is also
+    required that all cell values are valid (i.e. can be converted to the enum Cell).
     """
     # check input
     if not isinstance(matrix, np.ndarray):
@@ -52,43 +52,43 @@ class Maze():
     self.rows = self.shape[0]
     self.cols = self.shape[1]
 
-    # check cells and search for start and finishing cells
+    # check cells and search for start and end cells
     self.start = None
-    self.finish = None
+    self.end = None
 
-    for i, j in  zip(*np.where((self.maze != Cell.WHITE) & (self.maze != Cell.GREEN))):
+    for i, j in  zip(*np.where((self.maze != Cell.DEAD) & (self.maze != Cell.LIVE))):
       if self.maze[i, j] == Cell.START and self.start is None:
         self.start = (i, j)
-      elif self.maze[i, j] == Cell.FINISH and self.finish is None:
-        self.finish = (i, j)
+      elif self.maze[i, j] == Cell.END and self.end is None:
+        self.end = (i, j)
       else:
         raise RuntimeError(f'bad cell at ({i}, {j})')
 
-    # check if start and finish were found
-    if self.start is None or self.finish is None:
-      raise RuntimeError('input matrix is incomplete: missing start or finish tiles')
+    # check if start and end tiles were found
+    if self.start is None or self.end is None:
+      raise RuntimeError('input matrix is incomplete: missing start or end tiles')
     
     # set the cell dynamics to be the default one (can be changed using set_dynamics)
     self.dynamics = Maze.__default_dynamics
     
   @staticmethod
-  def __default_dynamics(ngreen, cell_type):
-    # start/finish cells do not change
-    if cell_type == Cell.START or cell_type == Cell.FINISH:
+  def __default_dynamics(nlive, cell_type):
+    # start/end cells do not change
+    if cell_type == Cell.START or cell_type == Cell.END:
       return cell_type
     
-    # dynamics of green and white cells are defined here:
-    if cell_type == Cell.WHITE and (1 < ngreen and ngreen < 5):
-      # white cells turn green if they have a number of adjacent green cells
-      # greater than 1 and less than 5. Otherwise, they remain white.
-      return Cell.GREEN
-    elif cell_type == Cell.GREEN and (3 < ngreen and ngreen < 6):
-      # green cells remain green if they have a number of green adjacent cells
-      # greater than 3 and less than 6. Otherwise they become white.
-      return Cell.GREEN
+    # cell dynamics are defined:
+    if cell_type == Cell.DEAD and (1 < nlive and nlive < 5):
+      # dead cells become alive if they have a number of adjacent live cells
+      # greater than 1 and less than 5
+      return Cell.LIVE
+    elif cell_type == Cell.LIVE and (3 < nlive and nlive < 6):
+      # live cells remain alive if they have a number of live adjacent cells
+      # greater than 3 and less than 6
+      return Cell.LIVE
     else:
-      # all other cells become or remain white
-      return Cell.WHITE
+      # all other cells remain dead or die
+      return Cell.DEAD
     
   def __validate_position(self, position: Position) -> Position:
     # check if position is a tuple of values
@@ -108,7 +108,7 @@ class Maze():
     return (i, j)
   
   def __validate_cell(self, i: int) -> Cell:
-    if i != Cell.START and i != Cell.FINISH and i != Cell.WHITE and i != Cell.GREEN:
+    if i != Cell.START and i != Cell.END and i != Cell.DEAD and i != Cell.LIVE:
       raise RuntimeError(f'invalid cell type {i}')
     
     return i
@@ -125,23 +125,23 @@ class Maze():
     other.set_dynamics(self.dynamics)
     return other
   
-  def count_green_neighbours(self, position: Position) -> int:
+  def count_live_neighbours(self, position: Position) -> int:
     """
-    Counts the number of green cells among the direct neighbours of the cell at the
+    Counts the number of live cells among the direct neighbours of the cell at the
     given position.
 
     Arguments:
-    - ```position: tuple[int, int]```: position of the cell around which the number of green cells will
-    be computed
+    - ```position: tuple[int, int]```: position of the cell around which the number of
+    live cells will be computed
 
-    Returns: an integer corresponding to the count of green neighbours.
+    Returns: an integer corresponding to the count of live neighbour cells.
     """
     # note: input position is validated within get_neighbours, no need to check here
 
     count = 0
 
     for ij in self.get_neighbours(position):
-      if self.maze[ij] == Cell.GREEN:
+      if self.maze[ij] == Cell.LIVE:
         count += 1
     
     return count
@@ -150,7 +150,8 @@ class Maze():
     """
     Draw the maze using ```matplotlib```'s ```matshow``` method. If a position is given
     as argument, a cursor is drawn at such position and all possible valid moves are
-    marked in the grid.
+    marked in the grid. As valid moves, we consider movements that will end up in a dead
+    cell after the maze is evolved.
 
     Arguments:
     - ```position: tuple[int, int]```: cursor position
@@ -227,8 +228,8 @@ class Maze():
     Returns: ```self``` if overwrite is enabled or a new ```Maze``` otherwise.
     """
 
-    # start with a maze of white cells
-    other = np.full(self.maze.shape, Cell.WHITE, dtype = int)
+    # start with a maze of dead cells
+    other = np.full(self.maze.shape, Cell.DEAD, dtype = int)
 
     # apply dynamics to every cell
     for pos in np.ndindex(self.shape):
@@ -280,12 +281,12 @@ class Maze():
     Returns: a ```Cell``` corresponding to the cell evolution
     """
 
-    # note: position will be validated in count_green_neighbours
-    ngreen = self.count_green_neighbours(position)
+    # note: position will be validated in count_live_neighbours
+    nlive = self.count_live_neighbours(position)
     cell_type = self.maze[position]
 
     # return value given by dynamics
-    return self.dynamics(ngreen = ngreen, cell_type = cell_type)
+    return self.dynamics(nlive = nlive, cell_type = cell_type)
 
   def get_neighbours(self, position: Position, include_diag: bool = True) -> list[Position]:
     """
@@ -318,7 +319,8 @@ class Maze():
   def get_valid_moves(self, position: Position = None) -> list[Position]:
     """
     Get a list of valid moves for a cursor at the given position. That is, computes all
-    movements, starting at position, that will end up in a white cell.
+    movements, starting at position, that will end up in a dead cell after the maze is
+    evolved.
 
     Arguments:
     - ```position: Position```: cursor position
@@ -327,15 +329,15 @@ class Maze():
     """
     position = self.start if position is None else self.__validate_position(position)
 
-    # if cursor is above a green cell, no moves are allowed
-    if self.maze[position] == Cell.GREEN:
+    # if cursor is above a live cell, no moves are allowed
+    if self.maze[position] == Cell.LIVE:
       return []
     
     # get neighbour cells
     nb = self.get_neighbours(position, include_diag = False)
 
-    # valid moves are neighbour cells that will not evolve to green
-    valid_moves = [p for p in nb if self.get_mutation(p) != Cell.GREEN]
+    # valid moves are neighbour cells that will not become alive
+    valid_moves = [p for p in nb if self.get_mutation(p) != Cell.LIVE]
 
     return valid_moves
   
@@ -344,7 +346,7 @@ class Maze():
     Takes a cursor at the given position, computes all valid moves starting at such
     position, then randomly choose one of these moves and returns it. Optionally,
     can evolve the maze to the next state. If the cursor is stuck (i.e. no move
-    will lead to a white cell), the function returns None.
+    will lead to a dead cell), the function returns None.
 
     Arguments:
     - ```position: Position```: cursor position
@@ -367,17 +369,17 @@ class Maze():
   def set_dynamics(self, dynamics_function: typing.Callable):
     """
     Function to define cell dynamics. The given dynamics function must be a callable
-    compatible with the signature ```dynamics_function(ngreen: int, cell_type: Cell) -> Cell```.
+    compatible with the signature ```dynamics_function(nlive: int, cell_type: Cell) -> Cell```.
 
     Arguments:
     - ```dynamics_functions: callable```: the new function describing the cell dynamics for this maze
 
     Returns nothing.
     """
-    for ct in [Cell.START, Cell.FINISH, Cell.WHITE, Cell.GREEN]:
-      for ng in range(9):
+    for ct in [Cell.START, Cell.END, Cell.DEAD, Cell.LIVE]:
+      for nlive in range(9):
         try:
-          ret = dynamics_function(ngreen = ng, cell_type = ct)
+          ret = dynamics_function(nlive = nlive, cell_type = ct)
           self.__validate_cell(ret)
         except:
           raise RuntimeError('given dynamics function is invalid')
@@ -389,12 +391,12 @@ class Maze():
     Solve the maze by computing all possible paths for a cursor starting at the given
     position that end up in the finishing cell. For that, a step-by-step evolution
     of the maze is computed. For every step (corresponding to a given cell state in the
-    maze) every survival path is appended with all possible moves that end up in a white
+    maze) every survival path is appended with all possible moves that end up in a dead
     cell. Degenerate, different paths that lead to a same position at a given step are
-    collapsed, since the future steps depend only on the current cell state and cursor
-    position. Once the first path leading to the finishing cell is found, the function
-    returns such path. If after ```max_steps``` no such path is found, the function will
-    return nothing.
+    collapsed, since the future steps depend only on the current maze configuration and
+    cursor position. Once the first path leading to the finishing cell is found, the
+    function returns such path. If after ```max_steps``` no such path is found, the
+    function returns nothing.
 
     Arguments:
     - ```position: Position```: starting cursor position
@@ -408,14 +410,14 @@ class Maze():
     starting_position = self.start if starting_position is None else self.__validate_position(starting_position)
 
     # in case the position is already the end cell
-    if self.maze[starting_position] == Cell.FINISH:
+    if self.maze[starting_position] == Cell.END:
       return [starting_position]
 
     # get a clone of this maze, so this maze will not be modified
     mz = self.clone()
 
     # this is a list of all survival paths at a given step
-    # that is, paths that go only throgh white cells
+    # that is, paths that go only through dead cells
     survival_paths = [[(starting_position)]]
 
     # iterate over steps (starting at 1 because step 0 is the starting position)
@@ -434,11 +436,11 @@ class Maze():
       # in different paths that lead to the same position at the same step)
       for path in survival_paths:
         for move in mz.get_valid_moves(path[-1]):
-          if move == self.finish:
+          if move == self.end:
             # path to the ending cell found
             return path + [move]
           elif not move in ending_points:
-            # path to new white cell found
+            # path to new dead cell found
             next_survival_paths.append(path + [move])
             ending_points.append(move)
 
@@ -451,7 +453,7 @@ class Maze():
         shortest_dist = None
         for path in survival_paths:
           cell = path[-1]
-          dist = math.hypot(cell[0] - self.finish[0], cell[1] - self.finish[1])
+          dist = math.hypot(cell[0] - self.end[0], cell[1] - self.end[1])
           if shortest_dist is None or dist < shortest_dist:
             shortest_dist = dist
         print(f'step: {i-1}, paths: {len(survival_paths)}, shortest distance to finish: {shortest_dist}')
@@ -462,7 +464,7 @@ class Maze():
   def solve_random(self, position: Position = None, tries: int = 100, verbose: bool = False) -> list[Position]:
     """
     Naive approach to solving a maze: make a cursor walk randomly from the starting position,
-    but taking into account only moves that will lead to a white cell. Eventually, if the cursor
+    but taking into account only moves that will lead to a dead cell. Eventually, if the cursor
     end up in the finishing cell, a path is returned. If, after ```tries``` attempts, no path
     leads to the finishing cell, nothing is returned.
 
@@ -477,7 +479,7 @@ class Maze():
     position = self.start if position is None else self.__validate_position(position)
 
     # in case the position is already the end cell
-    if self.maze[position] == Cell.FINISH:
+    if self.maze[position] == Cell.END:
       return [position]
 
     # get a clone of this maze, so this maze will not be modified
@@ -500,14 +502,14 @@ class Maze():
       # otherwise, add path + move to the list of survival paths if path + move
       for path in random_paths:
         move = mz.random_walk(path[-1])
-        if move == self.finish:
+        if move == self.end:
           # path to the ending cell found
           return path + [move]
         elif move is None:
           # no moves available from path
           continue
         else:
-          # random path to white cell exists
+          # random path to dead cell exists
           next_random_paths.append(path + [move])
 
       # update the list of random paths and evolve the maze
@@ -519,7 +521,7 @@ class Maze():
         shortest_dist = None
         for path in random_paths:
           cell = path[-1]
-          dist = math.hypot(cell[0] - self.finish[0], cell[1] - self.finish[1])
+          dist = math.hypot(cell[0] - self.end[0], cell[1] - self.end[1])
           if shortest_dist is None or dist < shortest_dist:
             shortest_dist = dist
         print(f'step: {istep}, paths: {len(random_paths)}, shortest distance to finish: {shortest_dist}')
