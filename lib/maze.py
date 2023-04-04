@@ -463,6 +463,9 @@ class Maze():
       # set of possible ending cells of all paths after the current step
       ending_points = []
 
+      # evolve the path, so we can access future dead cells
+      mz.evolve()
+
       # iterate over all survival paths before the current step
       # for each path, compute every possible move from its last position.
       # if the move leads to a finishing cell, then we are done: return the path
@@ -470,18 +473,17 @@ class Maze():
       # leads to a cell that no other path does (because we are not interested
       # in different paths that lead to the same position at the same step)
       for path in survival_paths:
-        for move in mz.get_valid_moves(path[-1]):
-          if move == self.end:
-            # path to the ending cell found
-            return path + [move]
-          elif not move in ending_points:
-            # path to new dead cell found
-            next_survival_paths.append(path + [move])
-            ending_points.append(move)
+        for pos in self.get_neighbours(path[-1], include_diag = False):
+          if pos == self.end:
+            return path + [pos]
+          elif mz.maze[pos] == Cell.LIVE:
+            continue
+          elif not pos in ending_points:
+            next_survival_paths.append(path + [pos])
+            ending_points.append(pos)
 
       # update the list of survival paths and evolve the maze
       survival_paths = next_survival_paths
-      mz.evolve()
 
       # dump information if verbose flag is enabled
       if verbose:
