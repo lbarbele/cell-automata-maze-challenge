@@ -423,7 +423,7 @@ class Maze():
     self.dynamics = dynamics_function
     self._has_custom_dynamics = True
 
-  def solve(self, starting_position: Position = None, max_steps: int = 100, verbose: bool = False) -> list[Position] | None:
+  def solve(self, starting_position: Position = None, max_steps: int = 100, verbose: bool = False, drop_rule: int = None) -> list[Position] | None:
     """
     Solve the maze by computing all possible paths for a cursor starting at the given
     position that end up in the finishing cell. For that, a step-by-step evolution
@@ -473,6 +473,10 @@ class Maze():
       # evolve the path, so we can access future dead cells
       mz.evolve()
 
+      # keep track of the shortest distance
+      if drop_rule is not None:
+        shortest_dist = self.rows + self.cols
+
       # iterate over all survival paths before the current step
       # for each path, compute every possible move from its last position.
       # if the move leads to a finishing cell, then we are done: return the path
@@ -486,15 +490,22 @@ class Maze():
           elif mz.maze[pos] == Cell.LIVE:
             continue
           elif pos not in ending_points:
+            shortest_dist = min(shortest_dist, self.get_distance_to_end(pos))
             next_survival_paths.append(path + [pos])
             ending_points.append(pos)
 
       # update the list of survival paths and evolve the maze
-      survival_paths = next_survival_paths
+      if drop_rule is not None:
+        survival_paths = []
+        for path in next_survival_paths:
+          dist = self.get_distance_to_end(path[-1])
+          if dist - shortest_dist < drop_rule:
+            survival_paths.append(path)
+      else:
+        survival_paths = next_survival_paths
 
       # dump information if verbose flag is enabled
       if verbose:
-        shortest_dist = np.min([self.get_distance_to_end(path[-1]) for path in survival_paths])
         print(f'step: {i-1}, paths: {len(survival_paths)}, shortest distance to finish: {shortest_dist}')
 
     # in case no path was found
