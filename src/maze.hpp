@@ -12,6 +12,10 @@ private:
   Position _start_pos;
   Matrix<uint> _config;
 
+  void set_cell(const std::size_t i, const std::size_t j);
+  void clear_cell(const std::size_t i, const std::size_t j);
+  uint& cell_state(const std::size_t i, const std::size_t j);
+
 public:
   struct Cell {
     static const uint dead = 0;

@@ -22,7 +22,7 @@ Maze::Maze(
         case Cell::dead:
           break;
         case Cell::live:
-          _config[{i+1, j+1}] = Cell::live;
+          set_cell(i, j);
           break;
         case Cell::start:
           if (!has_start) {
@@ -56,6 +56,33 @@ Maze::Maze(
   }
 }
 
+void
+Maze::set_cell(
+  const std::size_t i,
+  const std::size_t j
+)
+{
+  _config[{i+1, j+1}] = Cell::live;
+}
+
+void
+Maze::clear_cell(
+  const std::size_t i,
+  const std::size_t j
+)
+{
+  _config[{i+1, j+1}] = Cell::dead;
+}
+
+uint&
+Maze::cell_state(
+  const std::size_t i,
+  const std::size_t j
+)
+{
+  return _config[{i+1, j+1}];
+}
+
 Maze
 Maze::evolve()
 {
@@ -63,19 +90,21 @@ Maze::evolve()
 
   uint count = 0;
 
-  for (std::size_t i = 1; i <= rows; ++i) {
-    for (std::size_t j = 1; j <= cols; ++j) {
+  for (std::size_t i = 0; i < rows; ++i) {
+    for (std::size_t j = 0; j < cols; ++j) {
       count =
-        m[{i-1, j-1}] + m[{i-1, j}] + m[{i-1, j+1}] +
-        m[{  i, j-1}] +               m[{  i, j+1}] + 
-        m[{i+1, j-1}] + m[{i+1, j}] + m[{i+1, j+1}];
+        m[{  i, j}] + m[{  i, j+1}] + m[{  i, j+2}] +
+        m[{i+1, j}] +                 m[{i+1, j+2}] + 
+        m[{i+2, j}] + m[{i+2, j+1}] + m[{i+2, j+2}];
 
-      auto& state = _config[{i, j}];
-
-      if ((state == Cell::live) && (3 >= count || count >= 7)) {
-        state = Cell::dead;
-      } else if ((state == Cell::dead) && (1 < count && count < 4)) {
-        state = Cell::live;
+      if (cell_state(i, j) == Cell::live) {
+        if (3 >= count || count >= 7) {
+          clear_cell(i, j);
+        }
+      } else {
+        if (1 < count && count < 4) {
+          set_cell(i, j);
+        }
       }
     }
   }
