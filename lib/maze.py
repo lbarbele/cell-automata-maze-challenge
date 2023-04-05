@@ -474,8 +474,7 @@ class Maze():
       mz.evolve()
 
       # keep track of the shortest distance
-      if drop_rule is not None:
-        shortest_dist = self.rows + self.cols
+      shortest_dist = self.rows + self.cols
 
       # iterate over all survival paths before the current step
       # for each path, compute every possible move from its last position.
