@@ -1,0 +1,32 @@
+#ifndef _has_maze_hpp_
+#define _has_maze_hpp_
+
+#include "matrix.hpp"
+#include "position.hpp"
+
+class Maze {
+private:
+  Position _end_pos;
+  Position _start_pos;
+  Matrix<uint> _config;
+
+public:
+  struct Cell {
+    static const uint dead = 0;
+    static const uint live = 1;
+    static const uint start = 3;
+    static const uint end = 4;
+  };
+
+  const Matrix<uint>& config = _config;
+  const std::size_t& rows = config.rows;
+  const std::size_t& cols = config.cols;
+  const Position& end_pos = _end_pos;
+  const Position& start_pos = _start_pos;
+
+  Maze(const Matrix<uint>& m);
+
+  Maze evolve();
+};
+
+#endif // _has_maze_hpp_
