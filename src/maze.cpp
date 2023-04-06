@@ -101,10 +101,14 @@ Maze::evolve()
       const auto idx = i*cols + j;
       const auto count = m[idx] / 2;
 
-      if (m[idx] &= Cell::live && (count < 4 || count > 6)) {
-        clear_cell(idx);
-      } else if (1 < count && count < 4) {
-        set_cell(idx);
+      if (m[idx] & Cell::live) {
+        if ((count < 4 || count > 6)) {
+          clear_cell(idx);
+        }
+      } else {
+        if (1 < count && count < 4) {
+          set_cell(idx);
+        }
       }
     }
   }
