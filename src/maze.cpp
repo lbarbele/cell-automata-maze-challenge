@@ -6,11 +6,9 @@
 Maze::Maze(
   const Matrix<uint>& m
 ) :
-  _rows(m.rows),
-  _cols(m.cols),
   _end_pos({0, 0}),
   _start_pos({0, 0}),
-  _config(Matrix<uint>::full(m.rows + 2, m.cols + 2, 0))
+  _config(Matrix<uint>::full(m.rows, m.cols, 0))
 {
   bool has_start = false;
   bool has_end = false;
@@ -62,7 +60,7 @@ Maze::set_cell(
   const std::size_t j
 )
 {
-  _config[{i+1, j+1}] = Cell::live;
+  _config[{i, j}] = Cell::live;
 }
 
 void
@@ -71,7 +69,7 @@ Maze::clear_cell(
   const std::size_t j
 )
 {
-  _config[{i+1, j+1}] = Cell::dead;
+  _config[{i, j}] = Cell::dead;
 }
 
 uint&
@@ -80,7 +78,7 @@ Maze::cell_state(
   const std::size_t j
 )
 {
-  return _config[{i+1, j+1}];
+  return _config[{i, j}];
 }
 
 Maze
@@ -88,30 +86,48 @@ Maze::evolve()
 {
   auto m = Matrix<uint>(config);
 
-  uint count = 0;
+  for (std::size_t idx = 0; idx < rows*cols; ++idx) {
+    const auto i = idx/cols;
+    const auto j = idx%cols;
 
-  for (std::size_t i = 0; i < rows; ++i) {
-    for (std::size_t j = 0; j < cols; ++j) {
-      count =
-        m[{  i, j}] + m[{  i, j+1}] + m[{  i, j+2}] +
-        m[{i+1, j}] +                 m[{i+1, j+2}] + 
-        m[{i+2, j}] + m[{i+2, j+1}] + m[{i+2, j+2}];
+    uint count = 0;
 
-      if (cell_state(i, j) == Cell::live) {
-        if (3 >= count || count >= 7) {
-          clear_cell(i, j);
-        }
-      } else {
-        if (1 < count && count < 4) {
-          set_cell(i, j);
-        }
+    if (i > 0) {
+      if (j > 0) {
+        count += m[idx-1];
+        count += m[idx-cols];
+        count += m[idx-cols-1];
+      }
+      if (j < cols-1) {
+        count += m[idx-cols+1];
+      }
+    }
+
+    if (i < rows-1) {
+      if (j > 0) {
+        count += m[idx+cols-1];
+      }
+      if (j < cols-1) {
+        count += m[idx+1];
+        count += m[idx+cols];
+        count += m[idx+cols+1];
+      }
+    }
+
+    if (m[idx] == Cell::live) {
+      if (3 >= count || count >= 7) {
+        _config[idx] = Cell::dead;
+      }
+    } else {
+      if (1 < count && count < 4) {
+        _config[idx] = Cell::live;
       }
     }
   }
 
   // restore start/end cells in case they have changed
-  _config[{start_pos.x + 1, start_pos.y + 1}] = Cell::dead;
-  _config[{end_pos.x + 1, end_pos.y + 1}] = Cell::dead;
+  _config[start_pos] = Cell::dead;
+  _config[end_pos] = Cell::dead;
 
   return *this;
 }
