@@ -198,8 +198,13 @@ Maze::evolve()
   }
 
   // restore start/end cells in case they have changed
-  _config[start_pos] = Cell::dead;
-  _config[end_pos] = Cell::dead;
+  if (_config[start_pos] & Cell::live) {
+    clear_cell(start_pos.x, start_pos.y);
+  }
+
+  if (_config[end_pos] & Cell::live) {
+    clear_cell(end_pos.x, end_pos.y);
+  }
 
   return *this;
 }
