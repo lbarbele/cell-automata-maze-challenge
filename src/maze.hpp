@@ -36,12 +36,14 @@ public:
   const Position& end_pos = _end_pos;
   const Position& start_pos = _start_pos;
 
+  Maze(const Maze& other);
   Maze(const Matrix<cell_t>& m);
 
   static Maze from_file(std::filesystem::path path)
   {return Maze(Matrix<cell_t>::from_file(path));}
 
   Maze& evolve();
+  void solve() const;
 };
 
 // maze printer

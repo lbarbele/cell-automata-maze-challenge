@@ -4,6 +4,14 @@
 #include "maze.hpp"
 
 Maze::Maze(
+  const Maze& other
+) :
+  _end_pos(other.end_pos),
+  _start_pos(other.start_pos),
+  _config(other.config)
+{}
+
+Maze::Maze(
   const Matrix<cell_t>& m
 ) :
   _end_pos({0, 0}),
@@ -189,4 +197,11 @@ Maze::evolve()
   }
 
   return *this;
+}
+
+void
+Maze::solve()
+const
+{
+  auto maze = (*this);
 }
