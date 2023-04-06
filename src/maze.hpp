@@ -13,7 +13,10 @@ private:
   Matrix<cell_t> _config;
 
   void set_cell(const std::size_t idx);
+  void set_cell(const std::size_t i, const std::size_t j);
   void clear_cell(const std::size_t idx);
+  void clear_cell(const std::size_t i, const std::size_t j);
+  
   
   struct Cell {
     static const cell_t dead = 0;

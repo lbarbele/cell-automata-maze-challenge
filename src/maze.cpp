@@ -160,6 +160,24 @@ Maze::clear_cell(
   }
 }
 
+void
+Maze::set_cell(
+  const std::size_t i,
+  const std::size_t j
+)
+{
+  set_cell(i*cols + j);
+}
+
+void
+Maze::clear_cell(
+  const std::size_t i,
+  const std::size_t j
+)
+{
+  clear_cell(i*cols + j);
+} 
+
 Maze&
 Maze::evolve()
 {
