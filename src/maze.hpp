@@ -39,4 +39,16 @@ public:
   Maze& evolve();
 };
 
+// maze printer
+template <class CharT, class Traits>
+std::basic_ostream<CharT, Traits>&
+operator<<(std::basic_ostream<CharT, Traits>& os, const Maze& m) {
+  for (std::size_t i = 0; i < m.rows*m.cols; ++i) {
+    os << std::setw(2) << m.config[i]%2;
+    if ((i+1)%m.cols == 0)
+      os << std::endl;
+  }
+  return os;
+}
+
 #endif // _has_maze_hpp_
