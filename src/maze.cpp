@@ -91,11 +91,11 @@ Maze::clear_cell(
   _config[idx+cols+1] -= 2;
 }
 
-Maze
+Maze&
 Maze::evolve()
 {
   auto m = Matrix<uint>(config);
-
+  
   for (std::size_t i = 1; i < rows-1; ++i) {
     for (std::size_t j = 1; j < cols-1; ++j) {
       const auto idx = i*cols + j;

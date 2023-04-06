@@ -1,6 +1,8 @@
 #ifndef _has_maze_hpp_
 #define _has_maze_hpp_
 
+#include <chrono>
+
 #include "matrix.hpp"
 #include "position.hpp"
 
@@ -31,7 +33,7 @@ public:
 
   Maze(const Matrix<uint>& m);
 
-  Maze evolve();
+  Maze& evolve();
 };
 
 #endif // _has_maze_hpp_
