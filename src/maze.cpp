@@ -164,20 +164,17 @@ Maze&
 Maze::evolve()
 {
   auto m = Matrix<cell_t>(config);
-  
-  for (std::size_t i = 0; i < rows; ++i) {
-    for (std::size_t j = 0; j < cols; ++j) {
-      const auto idx = i*cols + j;
-      const auto count = m[idx] / 4;
 
-      if (m[idx] & Cell::live) {
-        if ((count < 4 || count > 6)) {
-          clear_cell(idx);
-        }
-      } else {
-        if (1 < count && count < 4) {
-          set_cell(idx);
-        }
+  for (std::size_t idx = 0; idx < rows*cols; ++idx) {
+    const auto count = m[idx] / 4;
+
+    if (m[idx] & Cell::live) {
+      if ((count < 4 || count > 6)) {
+        clear_cell(idx);
+      }
+    } else {
+      if (1 < count && count < 4) {
+        set_cell(idx);
       }
     }
   }
