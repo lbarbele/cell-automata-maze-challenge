@@ -4,11 +4,11 @@
 #include "maze.hpp"
 
 Maze::Maze(
-  const Matrix<uint>& m
+  const Matrix<cell_t>& m
 ) :
   _end_pos({0, 0}),
   _start_pos({0, 0}),
-  _config(Matrix<uint>::full(m.rows, m.cols, Cell::dead))
+  _config(Matrix<cell_t>::full(m.rows, m.cols, Cell::dead))
 {
   bool has_start = false;
   bool has_end = false;
@@ -163,7 +163,7 @@ Maze::clear_cell(
 Maze&
 Maze::evolve()
 {
-  auto m = Matrix<uint>(config);
+  auto m = Matrix<cell_t>(config);
   
   for (std::size_t i = 0; i < rows; ++i) {
     for (std::size_t j = 0; j < cols; ++j) {
