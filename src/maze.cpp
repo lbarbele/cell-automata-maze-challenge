@@ -6,24 +6,22 @@
 Maze::Maze(
   const Matrix<uint>& m
 ) :
-  _rows(m.rows + 2),
-  _cols(m.cols + 2),
   _end_pos({0, 0}),
   _start_pos({0, 0}),
-  _config(Matrix<uint>::full(m.rows + 2, m.cols + 2, Cell::dead))
+  _config(Matrix<uint>::full(m.rows, m.cols, Cell::dead))
 {
   bool has_start = false;
   bool has_end = false;
 
   // loop over cells to check and search for start/end cells
-  for (std::size_t i = 1; i < rows-1; ++i) {
-    for (std::size_t j = 1; j < cols-1; ++j) {
-      const auto& state = m[{i-1, j-1}];
-      switch (state) {
+  for (std::size_t i = 0; i < rows; ++i) {
+    for (std::size_t j = 0; j < cols; ++j) {
+      const auto idx = i*cols + j;
+      switch (m[idx]) {
         case Cell::dead:
           break;
         case Cell::live:
-          set_cell(i*cols + j);
+          set_cell(idx);
           break;
         case Cell::start:
           if (!has_start) {
@@ -43,6 +41,11 @@ Maze::Maze(
           break;
         default:
           throw std::runtime_error("invalid cell type " + std::to_string(m[{i, j}]));
+      }
+
+      // set the border bit
+      if (i == 0 || i == rows - 1 || j == 0 || j == cols - 1) {
+        _config[idx] |= 2;
       }
     }
   }
@@ -64,14 +67,47 @@ Maze::set_cell(
 {
   _config[idx] ^= Cell::live;
 
-  _config[idx-cols] += 2;
-  _config[idx-cols-1] += 2;
-  _config[idx-cols+1] += 2;
-  _config[idx-1] += 2;
-  _config[idx+1] += 2;
-  _config[idx+cols] += 2;
-  _config[idx+cols-1] += 2;
-  _config[idx+cols+1] += 2;
+  const auto i = idx/cols;
+  const auto j = idx%cols;
+
+  if (_config[idx] & 2) {
+    if (i > 0) {
+      _config[idx-cols] += 4;
+      if (j < cols-1) {
+        _config[idx-cols+1] += 4;
+      }
+      if (j > 0) {
+        _config[idx-cols-1] += 4;
+      }
+    }
+
+    if (j > 0) {
+      _config[idx-1] += 4;
+      if (i < rows-1) {
+        _config[idx+cols-1] += 4;
+      }
+    }
+
+    if (i < rows-1) {
+      _config[idx+cols] += 4;
+      if (j < cols-1) {
+        _config[idx+cols+1] += 4;
+      }
+    }
+
+    if (j < cols-1) {
+      _config[idx+1] += 4;
+    }
+  } else {
+    _config[idx-cols-1] += 4;
+    _config[idx-cols] += 4;
+    _config[idx-cols+1] += 4;
+    _config[idx-1] += 4;
+    _config[idx+1] += 4;
+    _config[idx+cols-1] += 4;
+    _config[idx+cols] += 4;
+    _config[idx+cols+1] += 4;
+  }
 }
 
 void
@@ -81,14 +117,47 @@ Maze::clear_cell(
 {
   _config[idx] ^= Cell::live;
 
-  _config[idx-cols-1] -= 2;
-  _config[idx-cols] -= 2;
-  _config[idx-cols+1] -= 2;
-  _config[idx-1] -= 2;
-  _config[idx+1] -= 2;
-  _config[idx+cols-1] -= 2;
-  _config[idx+cols] -= 2;
-  _config[idx+cols+1] -= 2;
+  const auto i = idx/cols;
+  const auto j = idx%cols;
+
+  if (_config[idx] & 2) {
+    if (i > 0) {
+      _config[idx-cols] -= 4;
+      if (j < cols-1) {
+        _config[idx-cols+1] -= 4;
+      }
+      if (j > 0) {
+        _config[idx-cols-1] -= 4;
+      }
+    }
+
+    if (j > 0) {
+      _config[idx-1] -= 4;
+      if (i < rows-1) {
+        _config[idx+cols-1] -= 4;
+      }
+    }
+
+    if (i < rows-1) {
+      _config[idx+cols] -= 4;
+      if (j < cols-1) {
+        _config[idx+cols+1] -= 4;
+      }
+    }
+
+    if (j < cols-1) {
+      _config[idx+1] -= 4;
+    }
+  } else {
+    _config[idx-cols-1] -= 4;
+    _config[idx-cols] -= 4;
+    _config[idx-cols+1] -= 4;
+    _config[idx-1] -= 4;
+    _config[idx+1] -= 4;
+    _config[idx+cols-1] -= 4;
+    _config[idx+cols] -= 4;
+    _config[idx+cols+1] -= 4;
+  }
 }
 
 Maze&
@@ -96,10 +165,10 @@ Maze::evolve()
 {
   auto m = Matrix<uint>(config);
   
-  for (std::size_t i = 1; i < rows-1; ++i) {
-    for (std::size_t j = 1; j < cols-1; ++j) {
+  for (std::size_t i = 0; i < rows; ++i) {
+    for (std::size_t j = 0; j < cols; ++j) {
       const auto idx = i*cols + j;
-      const auto count = m[idx] / 2;
+      const auto count = m[idx] / 4;
 
       if (m[idx] & Cell::live) {
         if ((count < 4 || count > 6)) {

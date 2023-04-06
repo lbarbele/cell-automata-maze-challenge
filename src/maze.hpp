@@ -8,8 +8,6 @@
 
 class Maze {
 private:
-  std::size_t _rows;
-  std::size_t _cols;
   Position _end_pos;
   Position _start_pos;
   Matrix<uint> _config;
@@ -26,8 +24,8 @@ public:
   };
 
   const Matrix<uint>& config = _config;
-  const std::size_t& rows = _rows;
-  const std::size_t& cols = _cols;
+  const std::size_t& rows = config.rows;
+  const std::size_t& cols = config.cols;
   const Position& end_pos = _end_pos;
   const Position& start_pos = _start_pos;
 
