@@ -160,24 +160,6 @@ Maze::clear_cell(
   }
 }
 
-void
-Maze::set_cell(
-  const std::size_t i,
-  const std::size_t j
-)
-{
-  set_cell(i*cols + j);
-}
-
-void
-Maze::clear_cell(
-  const std::size_t i,
-  const std::size_t j
-)
-{
-  clear_cell(i*cols + j);
-} 
-
 Maze&
 Maze::evolve()
 {
@@ -199,11 +181,11 @@ Maze::evolve()
 
   // restore start/end cells in case they have changed
   if (_config[start_pos] & Cell::live) {
-    clear_cell(start_pos.x, start_pos.y);
+    clear_cell(end_pos);
   }
 
   if (_config[end_pos] & Cell::live) {
-    clear_cell(end_pos.x, end_pos.y);
+    clear_cell(end_pos);
   }
 
   return *this;
