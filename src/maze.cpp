@@ -6,21 +6,24 @@
 Maze::Maze(
   const Matrix<uint>& m
 ) :
+  _rows(m.rows + 2),
+  _cols(m.cols + 2),
   _end_pos({0, 0}),
   _start_pos({0, 0}),
-  _config(Matrix<uint>::full(m.rows, m.cols, 0))
+  _config(Matrix<uint>::full(m.rows + 2, m.cols + 2, Cell::dead))
 {
   bool has_start = false;
   bool has_end = false;
 
   // loop over cells to check and search for start/end cells
-  for (std::size_t i = 0; i < rows; ++i) {
-    for (std::size_t j = 0; j < cols; ++j) {
-      switch (m[{i, j}]) {
+  for (std::size_t i = 1; i < rows-1; ++i) {
+    for (std::size_t j = 1; j < cols-1; ++j) {
+      const auto& state = m[{i-1, j-1}];
+      switch (state) {
         case Cell::dead:
           break;
         case Cell::live:
-          set_cell(i, j);
+          set_cell(i*cols + j);
           break;
         case Cell::start:
           if (!has_start) {
@@ -56,29 +59,36 @@ Maze::Maze(
 
 void
 Maze::set_cell(
-  const std::size_t i,
-  const std::size_t j
+  const std::size_t idx
 )
 {
-  _config[{i, j}] = Cell::live;
+  _config[idx] ^= Cell::live;
+
+  _config[idx-cols] += 2;
+  _config[idx-cols-1] += 2;
+  _config[idx-cols+1] += 2;
+  _config[idx-1] += 2;
+  _config[idx+1] += 2;
+  _config[idx+cols] += 2;
+  _config[idx+cols-1] += 2;
+  _config[idx+cols+1] += 2;
 }
 
 void
 Maze::clear_cell(
-  const std::size_t i,
-  const std::size_t j
+  const std::size_t idx
 )
 {
-  _config[{i, j}] = Cell::dead;
-}
+  _config[idx] ^= Cell::live;
 
-uint&
-Maze::cell_state(
-  const std::size_t i,
-  const std::size_t j
-)
-{
-  return _config[{i, j}];
+  _config[idx-cols-1] -= 2;
+  _config[idx-cols] -= 2;
+  _config[idx-cols+1] -= 2;
+  _config[idx-1] -= 2;
+  _config[idx+1] -= 2;
+  _config[idx+cols-1] -= 2;
+  _config[idx+cols] -= 2;
+  _config[idx+cols+1] -= 2;
 }
 
 Maze
@@ -86,41 +96,15 @@ Maze::evolve()
 {
   auto m = Matrix<uint>(config);
 
-  for (std::size_t idx = 0; idx < rows*cols; ++idx) {
-    const auto i = idx/cols;
-    const auto j = idx%cols;
+  for (std::size_t i = 1; i < rows-1; ++i) {
+    for (std::size_t j = 1; j < cols-1; ++j) {
+      const auto idx = i*cols + j;
+      const auto count = m[idx] / 2;
 
-    uint count = 0;
-
-    if (i > 0) {
-      if (j > 0) {
-        count += m[idx-1];
-        count += m[idx-cols];
-        count += m[idx-cols-1];
-      }
-      if (j < cols-1) {
-        count += m[idx-cols+1];
-      }
-    }
-
-    if (i < rows-1) {
-      if (j > 0) {
-        count += m[idx+cols-1];
-      }
-      if (j < cols-1) {
-        count += m[idx+1];
-        count += m[idx+cols];
-        count += m[idx+cols+1];
-      }
-    }
-
-    if (m[idx] == Cell::live) {
-      if (3 >= count || count >= 7) {
-        _config[idx] = Cell::dead;
-      }
-    } else {
-      if (1 < count && count < 4) {
-        _config[idx] = Cell::live;
+      if (m[idx] &= Cell::live && (count < 4 || count > 6)) {
+        clear_cell(idx);
+      } else if (1 < count && count < 4) {
+        set_cell(idx);
       }
     }
   }
