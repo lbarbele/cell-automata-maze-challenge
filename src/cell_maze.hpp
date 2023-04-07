@@ -117,26 +117,11 @@ namespace utl {
       }
     }
 
-  public: // methods
+    // enable border bit on all border cells
 
-    // construct empty maze
-
-    cell_maze(
-      const std::size_t m,
-      const std::size_t n
-    ) :
-      _config(matrix<cell_t>::full(m, n, _dead_cell))
-    {}
-
-    // construct from matrix
-
-    cell_maze(
-      const matrix<cell_t>& m,
-      const bool ignore_bad = false
-    ) :
-      _config(matrix<cell_t>::full(m.rows(), m.cols(), _dead_cell))
+    void
+    _set_border()
     {
-      // enable the border bit for the border cells
       for (std::size_t i = 0; i < rows(); ++i) {
         _config[{i, 0}]        |= _border_bit;
         _config[{i, cols()-1}] |= _border_bit;
@@ -146,6 +131,30 @@ namespace utl {
         _config[{0, j}]        |= _border_bit;
         _config[{rows()-1, j}] |= _border_bit;
       }
+    }
+
+  public: // methods
+
+    // construct empty maze
+
+    cell_maze(
+      const std::size_t m,
+      const std::size_t n
+    ) :
+      _config(matrix<cell_t>::full(m, n, _dead_cell))
+    {
+      _set_border();
+    }
+
+    // construct from matrix
+
+    cell_maze(
+      const matrix<cell_t>& m,
+      const bool ignore_bad = false
+    ) :
+      _config(matrix<cell_t>::full(m.rows(), m.cols(), _dead_cell))
+    {
+      _set_border();
 
       // loop over matrix elements to get the initial configuration
       for (std::size_t idx = 0; idx < size(); ++idx) {
@@ -260,7 +269,7 @@ namespace utl {
       // loop over generations
       for (uint i = 0; i < generations; ++i) {
         // get a matrix representing the cell counts
-        auto count = config() / _count_padding;
+        const auto count = config()/_count_padding;
 
         // iterate over all cells, applying the propagation rules to all
         for (std::size_t idx = 0; idx < size(); ++idx) {
