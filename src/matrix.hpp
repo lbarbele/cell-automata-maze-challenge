@@ -40,9 +40,8 @@ public:
   //
   // copy constructor
   //
-  template <std::convertible_to<ValT> U>
   Matrix(
-    const Matrix<U>& other
+    const Matrix<ValT>& other
   ) :
     data(other.data.begin(), other.data.end()),
     _rows(other.rows),
