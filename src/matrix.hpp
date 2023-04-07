@@ -38,6 +38,18 @@ public:
   const std::size_t& cols = _cols;
 
   //
+  // copy constructor
+  //
+  template <std::convertible_to<ValT> U>
+  Matrix(
+    const Matrix<U>& other
+  ) :
+    data(other.data.begin(), other.data.end()),
+    _rows(other.rows),
+    _cols(other.cols)
+  {}
+
+  //
   // element access
   //
 
