@@ -15,12 +15,9 @@ public:
 private:
   Matrix<cell_t> _config;
 
-  struct Cell {
-    static const cell_t dead = 0;
-    static const cell_t live = 1;
-  };
-
-  static const cell_t _border_bit = 0b10;
+  static const cell_t _dead_cell     = 0b000;
+  static const cell_t _live_cell     = 0b001;
+  static const cell_t _border_bit    = 0b010;
   static const cell_t _count_padding = 0b100;
 
 public:
@@ -31,14 +28,14 @@ public:
     const Matrix<cell_t>& m,
     const bool ignore_bad = false
   ) :
-    _config(Matrix<cell_t>::full(m.rows(), m.cols(), Cell::dead))
+    _config(Matrix<cell_t>::full(m.rows(), m.cols(), _dead_cell))
   {
     // loop over matrix elements to get the initial configuration
     for (std::size_t idx = 0; idx < size(); ++idx) {
       switch (m[idx]) {
-      case Cell::dead:
+      case _dead_cell:
         break;
-      case Cell::live:
+      case _live_cell:
         set_cell(idx);
         break;
       default:
@@ -82,12 +79,12 @@ public:
     const std::size_t idx
   )
   {
-    _config[idx] ^= Cell::live;
-
-    const auto i = idx/cols();
-    const auto j = idx%cols();
+    _config[idx] ^= _live_cell;
 
     if (_config[idx] & _border_bit) {
+      const auto i = idx/cols();
+      const auto j = idx%cols();
+
       if (i > 0) {
         _config[idx-cols()] += _count_padding;
         if (j < cols()-1) {
@@ -137,12 +134,12 @@ public:
     const std::size_t idx
   )
   {
-    _config[idx] ^= Cell::live;
-
-    const auto i = idx/cols();
-    const auto j = idx%cols();
+    _config[idx] ^= _live_cell;
 
     if (_config[idx] & _border_bit) {
+      const auto i = idx/cols();
+      const auto j = idx%cols();
+
       if (i > 0) {
         _config[idx-cols()] -= _count_padding;
         if (j < cols()-1) {
@@ -193,9 +190,10 @@ public:
       auto m = Matrix<cell_t>(config());
 
       for (std::size_t idx = 0; idx < size(); ++idx) {
-        const auto count = m[idx] / _count_padding;
+        const auto& state = m[idx];
+        const auto count = state / _count_padding;
 
-        if (m[idx] & Cell::live) {
+        if (state & _live_cell) {
           if (count <= 3 || count >= 6) {
             clear_cell(idx);
           }
@@ -212,8 +210,8 @@ public:
 
   // functions to retrieve the state of a particular cell
 
-  auto operator[](const Position& p) const {return config[p] & Cell::live;}
-  auto operator[](const std::size_t idx) const {return config[idx] & Cell::live;}
+  auto operator[](const Position& p) const {return config[p] & _live_cell;}
+  auto operator[](const std::size_t idx) const {return config[idx] & _live_cell;}
 
   // utility
 
