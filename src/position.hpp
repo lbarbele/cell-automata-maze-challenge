@@ -1,15 +1,18 @@
 #ifndef _has_position_hpp_
 #define _has_position_hpp_
 
+#include <algorithm>
 #include <vector>
 
 struct Position {
   std::size_t x;
   std::size_t y;
 
-  const bool operator==(const Position& other) const {
-    return x == other.x && y == other.y;
-  }
+  const bool operator==(const Position& other) const
+  {return x == other.x && y == other.y;}
+
+  std::size_t distance(const Position& other) const
+  {return std::max(x, other.x) - std::min(x, other.x) + std::max(y, other.y) - std::min(y, other.y);}
 
   std::vector<Position> get_neighbours(
     const std::size_t rows,
