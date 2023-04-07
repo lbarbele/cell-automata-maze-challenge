@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <sstream>
 #include <vector>
 
 #include "position.hpp"
@@ -29,7 +30,7 @@ private:
     _data(m*n, value)
   {}
 
-  Matrix(const std::size_t m, const std::size_t n, const std::vector<ValT> data)
+  Matrix(const std::size_t m, const std::size_t n, const std::vector<ValT>& data)
   : _rows(m),
     _cols(n),
     _data(data)
@@ -40,6 +41,7 @@ public:
   auto cols() const {return _cols;}
   auto rows() const {return _rows;}
   auto size() const {return _data.size();}
+  const auto& data() const {return _data.data();}
 
   //
   // element access
@@ -63,7 +65,7 @@ public:
   }
 
   // create a matrix from a vector of data
-  static Matrix from_data(const std::size_t m, const std::size_t n, const std::vector<ValT> data) {
+  static Matrix from_data(const std::size_t m, const std::size_t n, const std::vector<ValT>& data) {
     if (data.size() != m*n) {
       throw std::runtime_error("data vector of size " + std::to_string(data.size()) + " can not be reshaped into " + std::to_string(m) + " per " + std::to_string(n) + " matrix");
     }
