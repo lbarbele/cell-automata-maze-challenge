@@ -16,20 +16,20 @@
 template <std::integral ValT>
 class Matrix {
 private:
-  std::vector<ValT> data;
+  std::vector<ValT> _data;
   std::size_t _rows;
   std::size_t _cols;
 
   Matrix(const std::size_t m, const std::size_t n, const ValT value)
   : _rows(m),
     _cols(n),
-    data(m*n, value)
+    _data(m*n, value)
   {}
 
   Matrix(const std::size_t m, const std::size_t n, const std::vector<ValT> data)
   : _rows(m),
     _cols(n),
-    data(data)
+    _data(data)
   {}
 
 public:
@@ -43,7 +43,7 @@ public:
   Matrix(
     const Matrix<ValT>& other
   ) :
-    data(other.data.begin(), other.data.end()),
+    _data(other._data.begin(), other._data.end()),
     _rows(other.rows),
     _cols(other.cols)
   {}
@@ -53,12 +53,12 @@ public:
   //
 
   // access by position (tuple)
-  auto& operator[](const Position p) {return data[p.x*cols + p.y];}
-  auto& operator[](const Position p) const {return data[p.x*cols + p.y];}
+  auto& operator[](const Position p) {return _data[p.x*cols + p.y];}
+  auto& operator[](const Position p) const {return _data[p.x*cols + p.y];}
 
   // access by single index
-  auto& operator[](const std::size_t idx) {return data[idx];}
-  auto& operator[](const std::size_t idx) const {return data[idx];}
+  auto& operator[](const std::size_t idx) {return _data[idx];}
+  auto& operator[](const std::size_t idx) const {return _data[idx];}
 
   //
   // functions to create a matrix
