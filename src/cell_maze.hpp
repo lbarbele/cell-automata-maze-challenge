@@ -50,7 +50,7 @@ namespace utl {
       // for cells on the border, take care of not trespassing array
       // limits. if the border bit is disabled, operate on all 8
       // adjacent cells
-      if (cur_state & _border_bit) {
+      if (is_border(idx)) {
         const auto i = idx/cols();
         const auto j = idx%cols();
 
@@ -153,6 +153,11 @@ namespace utl {
     void clear_cell(const std::size_t idx) {_update_cell(idx, _dead_cell);}
     void clear_cell(const std::size_t i, const std::size_t j) {clear_cell(i*cols() + j);}
     void clear_cell(const position& p) {clear_cell(p.x, p.y);}
+
+    // check if position is on border
+
+    bool is_border(const position& p) {return _config[p] & _border_bit;}
+    bool is_border(const std::size_t idx) {return _config[idx] & _border_bit;}
 
     // evolve maze by n generations
 
