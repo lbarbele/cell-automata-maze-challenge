@@ -121,6 +121,31 @@ namespace utl {
       return matrix::from_data(rows, cols, data);
     }
 
+    // transformation
+
+    matrix
+    apply(
+      auto op,
+      auto... args
+    ) const
+    {
+      auto m = full(rows(), cols(), 0);
+      for (std::size_t idx = 0; idx < size(); ++idx) m[idx] = op(_data[idx], args...);
+      return m;
+    }
+
+    matrix&
+    transform(
+      val_t(*op)(const val_t&)
+    )
+    {
+      for (std::size_t idx = 0; idx < size(); ++idx) {
+        _data[idx] = op(_data[idx]);
+      }
+      return *this;
+    }
+
+
     // arithmetic operations
     
     auto operator/(const std::integral auto& b) const
