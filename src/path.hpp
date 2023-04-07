@@ -88,10 +88,6 @@ namespace utl {
       // remove reference to previous, so it can be deleted
       _previous = nullptr;
     }
-
-    ~path() {
-      std::cout << "bye :) " << _position << std::endl;
-    }
   };
 
 } // utl
