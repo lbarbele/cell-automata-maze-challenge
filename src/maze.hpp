@@ -79,6 +79,10 @@ public:
     const std::size_t idx
   )
   {
+    if (_config[idx] & _live_cell) {
+      return;
+    }
+
     _config[idx] ^= _live_cell;
 
     if (_config[idx] & _border_bit) {
@@ -134,6 +138,10 @@ public:
     const std::size_t idx
   )
   {
+    if (~_config[idx] & _live_cell) {
+      return;
+    }
+
     _config[idx] ^= _live_cell;
 
     if (_config[idx] & _border_bit) {
