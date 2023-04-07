@@ -159,6 +159,11 @@ namespace utl {
     bool is_border(const position& p) {return _config[p] & _border_bit;}
     bool is_border(const std::size_t idx) {return _config[idx] & _border_bit;}
 
+    // check if cell is alive/dead
+
+    bool is_alive(const position& p) {return _config[p] & _live_cell;}
+    bool is_alive(const std::size_t idx) {return _config[idx] & _live_cell;}
+
     // evolve maze by n generations
 
     cell_maze&
@@ -170,10 +175,9 @@ namespace utl {
         auto m = matrix<cell_t>(config());
 
         for (std::size_t idx = 0; idx < size(); ++idx) {
-          const auto& state = m[idx];
-          const auto count = state / _count_padding;
+          const auto count = m[idx] / _count_padding;
 
-          if (state & _live_cell) {
+          if (is_alive(idx)) {
             if (count <= 3 || count >= 6)
               clear_cell(idx);
           } else {
