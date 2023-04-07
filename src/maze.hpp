@@ -31,10 +31,10 @@ public:
   const std::size_t& cols = config.cols;
 
   Maze(const Maze& other);
-  Maze(const Matrix<cell_t>& m);
+  Maze(const Matrix<cell_t>& m, const bool ignore_bad = false);
 
-  static Maze from_file(std::filesystem::path path)
-  {return Maze(Matrix<cell_t>::from_file(path));}
+  static Maze from_file(std::filesystem::path path, const bool ignore_bad = false)
+  {return Maze(Matrix<cell_t>::from_file(path), ignore_bad);}
 
   Maze& evolve();
 };

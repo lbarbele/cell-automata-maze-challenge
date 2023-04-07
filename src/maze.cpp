@@ -11,7 +11,8 @@ Maze::Maze(
 {}
 
 Maze::Maze(
-  const Matrix<cell_t>& m
+  const Matrix<cell_t>& m,
+  const bool ignore_bad
 ) :
   _config(Matrix<cell_t>::full(m.rows, m.cols, Cell::dead))
 {
@@ -24,7 +25,9 @@ Maze::Maze(
       set_cell(idx);
       break;
     default:
-      throw std::runtime_error("invalid cell type " + std::to_string(m[idx]));
+      if (!ignore_bad) {
+        throw std::runtime_error("invalid cell type " + std::to_string(m[idx]));
+      }
     }
   }
 
