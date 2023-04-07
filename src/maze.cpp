@@ -153,11 +153,11 @@ Maze::evolve(const uint generations)
       const auto count = m[idx] / 4;
 
       if (m[idx] & Cell::live) {
-        if (count < 4 || count > 6) {
+        if (count <= 3 || count >= 6) {
           clear_cell(idx);
         }
       } else {
-        if (1 < count && count < 4) {
+        if (1 < count && count < 5) {
           set_cell(idx);
         }
       }
