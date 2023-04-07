@@ -20,6 +20,9 @@ private:
     static const cell_t live = 1;
   };
 
+  static const cell_t _border_bit = 0b10;
+  static const cell_t _count_padding = 0b100;
+
 public:
 
   // construct from matrix
@@ -47,13 +50,13 @@ public:
 
     // enable the border bit for the border cells
     for (std::size_t i = 0; i < rows(); ++i) {
-      _config[{i, 0}] |= 2;
-      _config[{i, cols()-1}] |= 2;
+      _config[{i, 0}] |= _border_bit;
+      _config[{i, cols()-1}] |= _border_bit;
     }
 
     for (std::size_t j = 1; j < cols() - 1; ++j) {
-      _config[{0, j}] |= 2;
-      _config[{rows()-1, j}] |= 2;
+      _config[{0, j}] |= _border_bit;
+      _config[{rows()-1, j}] |= _border_bit;
     }
   }
 
@@ -84,43 +87,43 @@ public:
     const auto i = idx/cols();
     const auto j = idx%cols();
 
-    if (_config[idx] & 2) {
+    if (_config[idx] & _border_bit) {
       if (i > 0) {
-        _config[idx-cols()] += 4;
+        _config[idx-cols()] += _count_padding;
         if (j < cols()-1) {
-          _config[idx-cols()+1] += 4;
+          _config[idx-cols()+1] += _count_padding;
         }
         if (j > 0) {
-          _config[idx-cols()-1] += 4;
+          _config[idx-cols()-1] += _count_padding;
         }
       }
 
       if (j > 0) {
-        _config[idx-1] += 4;
+        _config[idx-1] += _count_padding;
         if (i < rows()-1) {
-          _config[idx+cols()-1] += 4;
+          _config[idx+cols()-1] += _count_padding;
         }
       }
 
       if (i < rows()-1) {
-        _config[idx+cols()] += 4;
+        _config[idx+cols()] += _count_padding;
         if (j < cols()-1) {
-          _config[idx+cols()+1] += 4;
+          _config[idx+cols()+1] += _count_padding;
         }
       }
 
       if (j < cols()-1) {
-        _config[idx+1] += 4;
+        _config[idx+1] += _count_padding;
       }
     } else {
-      _config[idx-cols()-1] += 4;
-      _config[idx-cols()] += 4;
-      _config[idx-cols()+1] += 4;
-      _config[idx-1] += 4;
-      _config[idx+1] += 4;
-      _config[idx+cols()-1] += 4;
-      _config[idx+cols()] += 4;
-      _config[idx+cols()+1] += 4;
+      _config[idx-cols()-1] += _count_padding;
+      _config[idx-cols()] += _count_padding;
+      _config[idx-cols()+1] += _count_padding;
+      _config[idx-1] += _count_padding;
+      _config[idx+1] += _count_padding;
+      _config[idx+cols()-1] += _count_padding;
+      _config[idx+cols()] += _count_padding;
+      _config[idx+cols()+1] += _count_padding;
     }
   }
 
@@ -139,43 +142,43 @@ public:
     const auto i = idx/cols();
     const auto j = idx%cols();
 
-    if (_config[idx] & 2) {
+    if (_config[idx] & _border_bit) {
       if (i > 0) {
-        _config[idx-cols()] -= 4;
+        _config[idx-cols()] -= _count_padding;
         if (j < cols()-1) {
-          _config[idx-cols()+1] -= 4;
+          _config[idx-cols()+1] -= _count_padding;
         }
         if (j > 0) {
-          _config[idx-cols()-1] -= 4;
+          _config[idx-cols()-1] -= _count_padding;
         }
       }
 
       if (j > 0) {
         _config[idx-1] -= 4;
         if (i < rows()-1) {
-          _config[idx+cols()-1] -= 4;
+          _config[idx+cols()-1] -= _count_padding;
         }
       }
 
       if (i < rows()-1) {
-        _config[idx+cols()] -= 4;
+        _config[idx+cols()] -= _count_padding;
         if (j < cols()-1) {
-          _config[idx+cols()+1] -= 4;
+          _config[idx+cols()+1] -= _count_padding;
         }
       }
 
       if (j < cols()-1) {
-        _config[idx+1] -= 4;
+        _config[idx+1] -= _count_padding;
       }
     } else {
-      _config[idx-cols()-1] -= 4;
-      _config[idx-cols()] -= 4;
-      _config[idx-cols()+1] -= 4;
-      _config[idx-1] -= 4;
-      _config[idx+1] -= 4;
-      _config[idx+cols()-1] -= 4;
-      _config[idx+cols()] -= 4;
-      _config[idx+cols()+1] -= 4;
+      _config[idx-cols()-1] -= _count_padding;
+      _config[idx-cols()] -= _count_padding;
+      _config[idx-cols()+1] -= _count_padding;
+      _config[idx-1] -= _count_padding;
+      _config[idx+1] -= _count_padding;
+      _config[idx+cols()-1] -= _count_padding;
+      _config[idx+cols()] -= _count_padding;
+      _config[idx+cols()+1] -= _count_padding;
     }
   }
 
@@ -190,7 +193,7 @@ public:
       auto m = Matrix<cell_t>(config());
 
       for (std::size_t idx = 0; idx < size(); ++idx) {
-        const auto count = m[idx] / 4;
+        const auto count = m[idx] / _count_padding;
 
         if (m[idx] & Cell::live) {
           if (count <= 3 || count >= 6) {
