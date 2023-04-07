@@ -22,8 +22,6 @@ private:
   struct Cell {
     static const cell_t dead = 0;
     static const cell_t live = 1;
-    static const cell_t start = 3;
-    static const cell_t end = 4;
   };
 
 public:
