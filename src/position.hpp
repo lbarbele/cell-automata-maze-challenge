@@ -2,9 +2,18 @@
 #define _has_position_hpp_
 
 #include <algorithm>
+#include <list>
 #include <vector>
 
 namespace utl {
+
+  struct position;
+
+  // aliases
+
+  using position_list = std::list<position>;
+
+  // actual class definition
 
   struct position {
     std::size_t x;
@@ -45,7 +54,7 @@ namespace utl {
   };
 
   // position printer
-  
+
   template <class CharT, class Traits>
   std::basic_ostream<CharT, Traits>&
   operator<<(
