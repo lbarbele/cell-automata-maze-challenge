@@ -113,6 +113,41 @@ public:
     // create the matrix object
     return Matrix::from_data(rows, data.size()/rows, data);
   }
+
+  //
+  // arithmetic operations
+  //
+  auto operator/(const std::integral auto& b) const
+  {
+    using RetT = decltype(value_type{}/b);
+    auto ret = Matrix<RetT>::full(rows, cols, 0);
+    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]/b;
+    return ret;
+  }
+
+  auto operator%(const std::integral auto& b) const
+  {
+    using RetT = decltype(value_type{}%b);
+    auto ret = Matrix<RetT>::full(rows, cols, 0);
+    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]%b;
+    return ret;
+  }
+
+  auto operator&(const std::integral auto& b) const
+  {
+    using RetT = decltype(value_type{}&b);
+    auto ret = Matrix<RetT>::full(rows, cols, 0);
+    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]&b;
+    return ret;
+  }
+
+  auto operator|(const std::integral auto& b) const
+  {
+    using RetT = decltype(value_type{}|b);
+    auto ret = Matrix<RetT>::full(rows, cols, 0);
+    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]|b;
+    return ret;
+  }
 };
 
 // matrix printer function
