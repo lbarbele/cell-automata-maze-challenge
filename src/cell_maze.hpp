@@ -164,6 +164,27 @@ namespace utl {
     bool is_alive(const position& p) {return _config[p] & _live_cell;}
     bool is_alive(const std::size_t idx) {return _config[idx] & _live_cell;}
 
+    // get neighbour positions of given cell
+
+    position_list
+    get_neighbours(
+      const position& p
+    )
+    {
+      const auto& [i, j] = p;
+
+      if (is_border(p)) {
+        position_list l;
+        if (i > 0)        l.emplace_back(i-1, j);
+        if (j > 0)        l.emplace_back(i, j-1);
+        if (i < rows()-1) l.emplace_back(i+1, j);
+        if (j < cols()-1) l.emplace_back(i, j+1);
+        return l;
+      } else {
+        return {{i-1, j}, {i+1, j}, {i, j-1}, {i, j+1}};
+      }
+    }
+
     // evolve maze by n generations
 
     cell_maze&
