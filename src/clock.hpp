@@ -14,27 +14,26 @@ namespace utl {
   public:
     using unit_t = U;
 
-    timer()
-    {
-      restart();
-    }
+    timer() {restart();}
 
-    timer& restart()
+    timer&
+    restart()
     {
       t = std::chrono::system_clock::now();
       return *this;
     }
 
     auto get() const
-    {
-      return std::chrono::duration_cast<unit_t>(timer().t - t);
-    }
+    {return std::chrono::duration_cast<unit_t>(timer().t - t);}
   };
 
 
   template <class CharT, class Traits, class U>
   std::basic_ostream<CharT, Traits>&
-  operator<<(std::basic_ostream<CharT, Traits>& os, const timer<U>& c) {
+  operator<<(
+    std::basic_ostream<CharT, Traits>& os,
+    const timer<U>& c
+  ) {
     return os << c.get();
   }
 
