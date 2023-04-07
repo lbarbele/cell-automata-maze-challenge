@@ -130,7 +130,7 @@ public:
 
   // cell clearer
 
-  void clear_cell(const std::size_t i, const std::size_t j) {clear_cell(i*cols + j);}
+  void clear_cell(const std::size_t i, const std::size_t j) {clear_cell(i*cols() + j);}
   void clear_cell(const Position& p) {clear_cell(p.x, p.y);}
 
   void
@@ -218,8 +218,8 @@ public:
 
   // functions to retrieve the state of a particular cell
 
-  auto operator[](const Position& p) const {return config[p] & _live_cell;}
-  auto operator[](const std::size_t idx) const {return config[idx] & _live_cell;}
+  auto operator[](const Position& p) const {return config()[p] & _live_cell;}
+  auto operator[](const std::size_t idx) const {return config()[idx] & _live_cell;}
 
   // utility
 
