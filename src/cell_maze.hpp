@@ -36,6 +36,23 @@ namespace utl {
       return _rule_repro_max >= _rule_repro_min && _rule_underpop < _rule_overpop;
     }
 
+    // apply propagation rules to cell
+
+    void
+    _apply_rules(
+      const std::size_t idx,
+      const cell_t neighbour_count
+    )
+    {
+      if (is_alive(idx)) {
+        if (neighbour_count <= _rule_underpop || neighbour_count >= _rule_overpop)
+          clear_cell(idx);
+      } else {
+        if (_rule_repro_min <= neighbour_count && neighbour_count <= _rule_repro_max)
+          set_cell(idx);
+      }
+    }
+
     // cell updater
 
     void
@@ -233,20 +250,12 @@ namespace utl {
 
       // loop over generations
       for (uint i = 0; i < generations; ++i) {
-        // create a copy of the current configuration
-        auto m = matrix<cell_t>(config());
+        // get a matrix representing the cell counts
+        auto count = config() / _count_padding;
 
         // iterate over all cells, applying the propagation rules to all
         for (std::size_t idx = 0; idx < size(); ++idx) {
-          const auto count = m[idx] / _count_padding;
-
-          if (is_alive(idx)) {
-            if (count <= _rule_underpop || count >= _rule_overpop)
-              clear_cell(idx);
-          } else {
-            if (_rule_repro_min <= count && count <= _rule_repro_max)
-              set_cell(idx);
-          }
+          _apply_rules(idx, count[idx]);
         }
       }
 
