@@ -13,7 +13,7 @@ public:
   using cell_t = CellT;
 
 private:
-  Matrix<cell_t> _config;
+  utl::matrix<cell_t> _config;
 
   static const cell_t _dead_cell     = 0b000;
   static const cell_t _live_cell     = 0b001;
@@ -91,10 +91,10 @@ public:
   // construct from matrix
 
   Maze(
-    const Matrix<cell_t>& m,
+    const utl::matrix<cell_t>& m,
     const bool ignore_bad = false
   ) :
-    _config(Matrix<cell_t>::full(m.rows(), m.cols(), _dead_cell))
+    _config(utl::matrix<cell_t>::full(m.rows(), m.cols(), _dead_cell))
   {
     // enable the border bit for the border cells
     for (std::size_t i = 0; i < rows(); ++i) {
@@ -132,7 +132,7 @@ public:
     const bool ignore_bad = false
   )
   {
-    return Maze(Matrix<cell_t>::from_file(path), ignore_bad);
+    return Maze(utl::matrix<cell_t>::from_file(path), ignore_bad);
   }
 
   // cell setter
@@ -155,7 +155,7 @@ public:
   )
   {
     for (uint i = 0; i < generations; ++i) {
-      auto m = Matrix<cell_t>(config());
+      auto m = utl::matrix<cell_t>(config());
 
       for (std::size_t idx = 0; idx < size(); ++idx) {
         const auto& state = m[idx];
