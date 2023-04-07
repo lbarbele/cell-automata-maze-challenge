@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 #include "position.hpp"
@@ -123,11 +124,12 @@ namespace utl {
 
     // transformation
 
-    matrix
+    auto
     apply(
       auto op,
       auto... args
-    ) const
+    ) -> matrix<std::invoke_result_t<decltype(op), val_t, decltype(args)...>>
+      const
     {
       auto m = full(rows(), cols(), 0);
       for (std::size_t idx = 0; idx < size(); ++idx) m[idx] = op(_data[idx], args...);
