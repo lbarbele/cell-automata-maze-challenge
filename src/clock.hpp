@@ -8,12 +8,13 @@ namespace utl {
 
   template <class U = std::chrono::milliseconds>
   class timer {
+  public:
+    using unit_t = U;
+
   private:
     decltype(std::chrono::system_clock::now()) t;
 
   public:
-    using unit_t = U;
-
     timer() {restart();}
 
     timer&
