@@ -16,18 +16,27 @@ Maze::Maze(
   _config(Matrix<cell_t>::full(m.rows, m.cols, Cell::dead))
 {
   // loop over matrix elements to get the initial configuration
-  for (std::size_t i = 0; i < rows; ++i) {
-    for (std::size_t j = 0; j < cols; ++j) {
-      // set cell state
-      if (m[{i, j}] == Cell::live) {
-        set_cell(i, j);
-      }
-
-      // enable the border bit for the border cells
-      if (i == 0 || i == rows - 1 || j == 0 || j == cols - 1) {
-        _config[{i, j}] |= 2;
-      }
+  for (std::size_t idx = 0; idx < rows*cols; ++idx) {
+    switch (m[idx]) {
+    case Cell::dead:
+      break;
+    case Cell::live:
+      set_cell(idx);
+      break;
+    default:
+      throw std::runtime_error("invalid cell type " + std::to_string(m[idx]));
     }
+  }
+
+  // enable the border bit for the border cells
+  for (std::size_t i = 0; i < rows; ++i) {
+    _config[{i, 0}] |= 2;
+    _config[{i, cols-1}] |= 2;
+  }
+
+  for (std::size_t j = 1; j < cols - 1; ++j) {
+    _config[{0, j}] |= 2;
+    _config[{rows-1, j}] |= 2;
   }
 }
 
