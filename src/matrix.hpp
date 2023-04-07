@@ -137,9 +137,9 @@ public:
 template <class CharT, class Traits, class ValT>
 std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, const Matrix<ValT>& m) {
-  for (std::size_t i = 0; i < m.rows*m.cols; ++i) {
+  for (std::size_t i = 0; i < m.size(); ++i) {
     os << std::setw(2) << m[i];
-    if ((i+1)%m.cols == 0)
+    if ((i+1)%m.cols() == 0)
       os << std::endl;
   }
   return os;

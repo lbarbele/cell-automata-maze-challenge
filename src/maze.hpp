@@ -73,7 +73,7 @@ public:
 
   void set_cell(const std::size_t i, const std::size_t j) {set_cell(i*cols() + j);}
   void set_cell(const Position& p) {set_cell(p.x, p.y);}
-  
+
   void
   set_cell(
     const std::size_t idx
@@ -237,7 +237,7 @@ operator<<(
   std::basic_ostream<CharT, Traits>& os,
   const Maze<C>& m
 ) {
-  return os << (m.config&1);
+  return os << (m.config()&1);
 }
 
 #endif // _has_maze_hpp_
