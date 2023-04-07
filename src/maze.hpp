@@ -36,7 +36,7 @@ public:
   static Maze from_file(std::filesystem::path path, const bool ignore_bad = false)
   {return Maze(Matrix<cell_t>::from_file(path), ignore_bad);}
 
-  Maze& evolve();
+  Maze& evolve(const uint generations = 1);
 };
 
 // maze printer

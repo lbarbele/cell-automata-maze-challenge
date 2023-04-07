@@ -144,23 +144,31 @@ Maze::clear_cell(
 }
 
 Maze&
-Maze::evolve()
+Maze::evolve(const uint generations)
 {
-  auto m = Matrix<cell_t>(config);
+  // if (!generations) {
+    // return *this;
+  // }
 
-  for (std::size_t idx = 0; idx < rows*cols; ++idx) {
-    const auto count = m[idx] / 4;
+  for (uint i = 0; i < generations; ++i) {
+    auto m = Matrix<cell_t>(config);
 
-    if (m[idx] & Cell::live) {
-      if ((count < 4 || count > 6)) {
-        clear_cell(idx);
-      }
-    } else {
-      if (1 < count && count < 4) {
-        set_cell(idx);
+    for (std::size_t idx = 0; idx < rows*cols; ++idx) {
+      const auto count = m[idx] / 4;
+
+      if (m[idx] & Cell::live) {
+        if ((count < 4 || count > 6)) {
+          clear_cell(idx);
+        }
+      } else {
+        if (1 < count && count < 4) {
+          set_cell(idx);
+        }
       }
     }
   }
 
   return *this;
+
+  // return evolve(generations - 1);
 }
