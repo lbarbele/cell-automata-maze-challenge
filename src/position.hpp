@@ -1,7 +1,7 @@
 #ifndef _has_position_hpp_
 #define _has_position_hpp_
 
-#include <concepts>
+#include <vector>
 
 struct Position {
   std::size_t x;
