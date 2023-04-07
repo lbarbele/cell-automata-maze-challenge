@@ -128,8 +128,8 @@ namespace utl {
     apply(
       auto op,
       auto... args
-    ) -> matrix<std::invoke_result_t<decltype(op), val_t, decltype(args)...>>
-      const
+    ) const ->
+      matrix<std::invoke_result_t<decltype(op), val_t, decltype(args)...>>
     {
       auto m = full(rows(), cols(), 0);
       for (std::size_t idx = 0; idx < size(); ++idx) m[idx] = op(_data[idx], args...);
@@ -147,40 +147,34 @@ namespace utl {
       return *this;
     }
 
+    // arithmetic operations with scalars
 
-    // arithmetic operations
-    
     auto operator/(const std::integral auto& b) const
-    {
-      using RetT = decltype(val_t{}/b);
-      auto ret = matrix<RetT>::full(rows(), cols(), 0);
-      for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]/b;
-      return ret;
-    }
+    {return apply([b](const auto& x){return x/b;});}
+
+    auto operator*(const std::integral auto& b) const
+    {return apply([b](const auto& x){return x*b;});}
 
     auto operator%(const std::integral auto& b) const
-    {
-      using RetT = decltype(val_t{}%b);
-      auto ret = matrix<RetT>::full(rows(), cols(), 0);
-      for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]%b;
-      return ret;
-    }
+    {return apply([b](const auto& x){return x%b;});}
 
     auto operator&(const std::integral auto& b) const
-    {
-      using RetT = decltype(val_t{}&b);
-      auto ret = matrix<RetT>::full(rows(), cols(), 0);
-      for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]&b;
-      return ret;
-    }
-
+    {return apply([b](const auto& x){return x&b;});}
+    
     auto operator|(const std::integral auto& b) const
-    {
-      using RetT = decltype(val_t{}|b);
-      auto ret = matrix<RetT>::full(rows(), cols(), 0);
-      for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]|b;
-      return ret;
-    }
+    {return apply([b](const auto& x){return x|b;});}
+    
+    auto operator^(const std::integral auto& b) const
+    {return apply([b](const auto& x){return x^b;});}
+    
+    auto operator~() const
+    {return apply([](const auto& x){return ~x;});}
+    
+    auto operator+() const
+    {return apply([](const auto& x){return +x;});}
+    
+    auto operator-() const
+    {return apply([](const auto& x){return -x;});}
   };
 
   // matrix printer function
