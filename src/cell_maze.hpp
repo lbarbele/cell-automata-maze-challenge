@@ -119,6 +119,15 @@ namespace utl {
 
   public: // methods
 
+    // construct empty maze
+
+    cell_maze(
+      const std::size_t m,
+      const std::size_t n
+    ) :
+      _config(matrix<cell_t>::full(m, n, _dead_cell))
+    {}
+
     // construct from matrix
 
     cell_maze(
