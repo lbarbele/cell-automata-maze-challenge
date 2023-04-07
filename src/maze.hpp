@@ -30,6 +30,17 @@ public:
   ) :
     _config(Matrix<cell_t>::full(m.rows(), m.cols(), _dead_cell))
   {
+    // enable the border bit for the border cells
+    for (std::size_t i = 0; i < rows(); ++i) {
+      _config[{i, 0}] |= _border_bit;
+      _config[{i, cols()-1}] |= _border_bit;
+    }
+
+    for (std::size_t j = 1; j < cols() - 1; ++j) {
+      _config[{0, j}] |= _border_bit;
+      _config[{rows()-1, j}] |= _border_bit;
+    }
+
     // loop over matrix elements to get the initial configuration
     for (std::size_t idx = 0; idx < size(); ++idx) {
       switch (m[idx]) {
@@ -43,17 +54,6 @@ public:
           throw std::runtime_error("invalid cell type " + std::to_string(m[idx]));
         }
       }
-    }
-
-    // enable the border bit for the border cells
-    for (std::size_t i = 0; i < rows(); ++i) {
-      _config[{i, 0}] |= _border_bit;
-      _config[{i, cols()-1}] |= _border_bit;
-    }
-
-    for (std::size_t j = 1; j < cols() - 1; ++j) {
-      _config[{0, j}] |= _border_bit;
-      _config[{rows()-1, j}] |= _border_bit;
     }
   }
 
