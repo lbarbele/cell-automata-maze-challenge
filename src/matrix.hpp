@@ -15,6 +15,9 @@
 
 template <std::integral ValT>
 class Matrix {
+public:
+  using val_t = ValT;
+
 private:
   std::vector<ValT> _data;
   std::size_t _rows;
@@ -33,38 +36,18 @@ private:
   {}
 
 public:
-  using value_type = ValT;
-  const std::vector<value_type>& data = _data;
-  const std::size_t& rows = _rows;
-  const std::size_t& cols = _cols;
 
-  //
-  // copy constructor
-  //
-  Matrix(
-    const Matrix<ValT>& other
-  ) :
-    _data(other._data.begin(), other._data.end()),
-    _rows(other.rows),
-    _cols(other.cols)
-  {}
-
-  template <std::convertible_to<ValT> U>
-  Matrix(
-    const Matrix<U>& other
-  ) :
-    _data(other.data.begin(), other.data.end()),
-    _rows(other.rows),
-    _cols(other.cols)
-  {}
+  auto cols() const {return _cols;}
+  auto rows() const {return _rows;}
+  auto size() const {return _data.size();}
 
   //
   // element access
   //
 
   // access by position (tuple)
-  auto& operator[](const Position p) {return _data[p.x*cols + p.y];}
-  auto& operator[](const Position p) const {return _data[p.x*cols + p.y];}
+  auto& operator[](const Position p) {return _data[p.x*cols() + p.y];}
+  auto& operator[](const Position p) const {return _data[p.x*cols() + p.y];}
 
   // access by single index
   auto& operator[](const std::size_t idx) {return _data[idx];}
@@ -119,33 +102,33 @@ public:
   //
   auto operator/(const std::integral auto& b) const
   {
-    using RetT = decltype(value_type{}/b);
-    auto ret = Matrix<RetT>::full(rows, cols, 0);
-    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]/b;
+    using RetT = decltype(val_t{}/b);
+    auto ret = Matrix<RetT>::full(rows(), cols(), 0);
+    for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]/b;
     return ret;
   }
 
   auto operator%(const std::integral auto& b) const
   {
-    using RetT = decltype(value_type{}%b);
-    auto ret = Matrix<RetT>::full(rows, cols, 0);
-    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]%b;
+    using RetT = decltype(val_t{}%b);
+    auto ret = Matrix<RetT>::full(rows(), cols(), 0);
+    for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]%b;
     return ret;
   }
 
   auto operator&(const std::integral auto& b) const
   {
-    using RetT = decltype(value_type{}&b);
-    auto ret = Matrix<RetT>::full(rows, cols, 0);
-    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]&b;
+    using RetT = decltype(val_t{}&b);
+    auto ret = Matrix<RetT>::full(rows(), cols(), 0);
+    for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]&b;
     return ret;
   }
 
   auto operator|(const std::integral auto& b) const
   {
-    using RetT = decltype(value_type{}|b);
-    auto ret = Matrix<RetT>::full(rows, cols, 0);
-    for (std::size_t i = 0; i < data.size(); ++i) ret[i] = data[i]|b;
+    using RetT = decltype(val_t{}|b);
+    auto ret = Matrix<RetT>::full(rows(), cols(), 0);
+    for (std::size_t i = 0; i < size(); ++i) ret[i] = _data[i]|b;
     return ret;
   }
 };
