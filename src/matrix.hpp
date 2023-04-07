@@ -50,8 +50,8 @@ namespace utl {
 
     // element access
 
-    auto& operator[](const Position p) {return _data[p.x*cols() + p.y];}
-    auto& operator[](const Position p) const {return _data[p.x*cols() + p.y];}
+    auto& operator[](const position p) {return _data[p.x*cols() + p.y];}
+    auto& operator[](const position p) const {return _data[p.x*cols() + p.y];}
 
     auto& operator[](const std::size_t idx) {return _data[idx];}
     auto& operator[](const std::size_t idx) const {return _data[idx];}
