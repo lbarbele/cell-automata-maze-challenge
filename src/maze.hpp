@@ -36,6 +36,9 @@ public:
   {return Maze(Matrix<cell_t>::from_file(path), ignore_bad);}
 
   Maze& evolve(const uint generations = 1);
+
+  auto operator[](const Position& p) const {return config[p] & Cell::live;}
+  auto operator[](const std::size_t idx) const {return config[idx] & Cell::live;}
 };
 
 // maze printer
