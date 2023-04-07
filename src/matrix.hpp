@@ -34,6 +34,7 @@ private:
 
 public:
   using value_type = ValT;
+  const std::vector<value_type>& data = _data;
   const std::size_t& rows = _rows;
   const std::size_t& cols = _cols;
 
@@ -44,6 +45,15 @@ public:
     const Matrix<ValT>& other
   ) :
     _data(other._data.begin(), other._data.end()),
+    _rows(other.rows),
+    _cols(other.cols)
+  {}
+
+  template <std::convertible_to<ValT> U>
+  Matrix(
+    const Matrix<U>& other
+  ) :
+    _data(other.data.begin(), other.data.end()),
     _rows(other.rows),
     _cols(other.cols)
   {}
