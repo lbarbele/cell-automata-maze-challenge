@@ -1,6 +1,9 @@
 #ifndef _has_path_hpp_
 #define _has_path_hpp_
 
+// ! beware the use of "position" here!
+
+#include <exception>
 #include <list>
 #include <memory>
 
@@ -48,11 +51,26 @@ public:
   const auto get_previous() const {return _previous;}
 
   auto get_position_list() {
-    std::list<Position> pos_list;
+    std::list<position_t> pos_list;
     for (auto p = get_ptr(); p != nullptr; p = p->get_previous()) {
       pos_list.push_front(p->get_position());
     }
     return pos_list;
+  }
+
+  void drop() {
+    if (!_next.empty()) {
+      throw std::runtime_error("can not drop a path if _next is not empty");
+    }
+
+    if (_previous) {
+      _previous->_next.remove(get_ptr());
+      if (_previous->_next.empty()) {
+        _previous->drop();
+      }
+    }
+
+    _previous = nullptr;
   }
 };
 
