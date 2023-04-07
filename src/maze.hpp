@@ -20,6 +20,72 @@ private:
   static const cell_t _border_bit    = 0b010;
   static const cell_t _count_padding = 0b100;
 
+  // cell updater
+
+  void
+  _update_cell(
+    const std::size_t idx,
+    const cell_t state
+  )
+  {
+    // get current cell state
+    auto& cur_state = _config[idx];
+
+    // do nothing if required state is the same as the current state
+    if ((cur_state & _live_cell) == state) {
+      return;
+    }
+
+    // switch cell state
+    _config[idx] ^= _live_cell;
+
+    // determine the count change value
+    const auto dcount = state ? _count_padding : -_count_padding;
+
+    // loop over neighbouring cells to update their neighbour count
+    if (cur_state & _border_bit) {
+      const auto i = idx/cols();
+      const auto j = idx%cols();
+
+      if (i > 0) {
+        _config[idx-cols()] += dcount;
+        if (j < cols()-1) {
+          _config[idx-cols()+1] += dcount;
+        }
+        if (j > 0) {
+          _config[idx-cols()-1] += dcount;
+        }
+      }
+
+      if (j > 0) {
+        _config[idx-1] += dcount;
+        if (i < rows()-1) {
+          _config[idx+cols()-1] += dcount;
+        }
+      }
+
+      if (i < rows()-1) {
+        _config[idx+cols()] += dcount;
+        if (j < cols()-1) {
+          _config[idx+cols()+1] += dcount;
+        }
+      }
+
+      if (j < cols()-1) {
+        _config[idx+1] += dcount;
+      }
+    } else {
+      _config[idx-cols()-1] += dcount;
+      _config[idx-cols()] += dcount;
+      _config[idx-cols()+1] += dcount;
+      _config[idx-1] += dcount;
+      _config[idx+1] += dcount;
+      _config[idx+cols()-1] += dcount;
+      _config[idx+cols()] += dcount;
+      _config[idx+cols()+1] += dcount;
+    }
+  }
+
 public:
 
   // construct from matrix
@@ -71,121 +137,15 @@ public:
 
   // cell setter
 
+  void set_cell(const std::size_t idx) {_update_cell(idx, _live_cell);}
   void set_cell(const std::size_t i, const std::size_t j) {set_cell(i*cols() + j);}
   void set_cell(const Position& p) {set_cell(p.x, p.y);}
 
-  void
-  set_cell(
-    const std::size_t idx
-  )
-  {
-    if (_config[idx] & _live_cell) {
-      return;
-    }
-
-    _config[idx] ^= _live_cell;
-
-    if (_config[idx] & _border_bit) {
-      const auto i = idx/cols();
-      const auto j = idx%cols();
-
-      if (i > 0) {
-        _config[idx-cols()] += _count_padding;
-        if (j < cols()-1) {
-          _config[idx-cols()+1] += _count_padding;
-        }
-        if (j > 0) {
-          _config[idx-cols()-1] += _count_padding;
-        }
-      }
-
-      if (j > 0) {
-        _config[idx-1] += _count_padding;
-        if (i < rows()-1) {
-          _config[idx+cols()-1] += _count_padding;
-        }
-      }
-
-      if (i < rows()-1) {
-        _config[idx+cols()] += _count_padding;
-        if (j < cols()-1) {
-          _config[idx+cols()+1] += _count_padding;
-        }
-      }
-
-      if (j < cols()-1) {
-        _config[idx+1] += _count_padding;
-      }
-    } else {
-      _config[idx-cols()-1] += _count_padding;
-      _config[idx-cols()] += _count_padding;
-      _config[idx-cols()+1] += _count_padding;
-      _config[idx-1] += _count_padding;
-      _config[idx+1] += _count_padding;
-      _config[idx+cols()-1] += _count_padding;
-      _config[idx+cols()] += _count_padding;
-      _config[idx+cols()+1] += _count_padding;
-    }
-  }
-
   // cell clearer
 
+  void clear_cell(const std::size_t idx) {_update_cell(idx, _dead_cell);}
   void clear_cell(const std::size_t i, const std::size_t j) {clear_cell(i*cols() + j);}
   void clear_cell(const Position& p) {clear_cell(p.x, p.y);}
-
-  void
-  clear_cell(
-    const std::size_t idx
-  )
-  {
-    if (~_config[idx] & _live_cell) {
-      return;
-    }
-
-    _config[idx] ^= _live_cell;
-
-    if (_config[idx] & _border_bit) {
-      const auto i = idx/cols();
-      const auto j = idx%cols();
-
-      if (i > 0) {
-        _config[idx-cols()] -= _count_padding;
-        if (j < cols()-1) {
-          _config[idx-cols()+1] -= _count_padding;
-        }
-        if (j > 0) {
-          _config[idx-cols()-1] -= _count_padding;
-        }
-      }
-
-      if (j > 0) {
-        _config[idx-1] -= 4;
-        if (i < rows()-1) {
-          _config[idx+cols()-1] -= _count_padding;
-        }
-      }
-
-      if (i < rows()-1) {
-        _config[idx+cols()] -= _count_padding;
-        if (j < cols()-1) {
-          _config[idx+cols()+1] -= _count_padding;
-        }
-      }
-
-      if (j < cols()-1) {
-        _config[idx+1] -= _count_padding;
-      }
-    } else {
-      _config[idx-cols()-1] -= _count_padding;
-      _config[idx-cols()] -= _count_padding;
-      _config[idx-cols()+1] -= _count_padding;
-      _config[idx-1] -= _count_padding;
-      _config[idx+1] -= _count_padding;
-      _config[idx+cols()-1] -= _count_padding;
-      _config[idx+cols()] -= _count_padding;
-      _config[idx+cols()+1] -= _count_padding;
-    }
-  }
 
   // evolve maze to the next generation
 
