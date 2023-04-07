@@ -1,5 +1,5 @@
 #include <exception>
-#include <list>
+#include <vector>
 
 #include "matrix.hpp"
 #include "maze.hpp"
@@ -146,10 +146,6 @@ Maze::clear_cell(
 Maze&
 Maze::evolve(const uint generations)
 {
-  // if (!generations) {
-    // return *this;
-  // }
-
   for (uint i = 0; i < generations; ++i) {
     auto m = Matrix<cell_t>(config);
 
@@ -157,7 +153,7 @@ Maze::evolve(const uint generations)
       const auto count = m[idx] / 4;
 
       if (m[idx] & Cell::live) {
-        if ((count < 4 || count > 6)) {
+        if (count < 4 || count > 6) {
           clear_cell(idx);
         }
       } else {
@@ -169,6 +165,4 @@ Maze::evolve(const uint generations)
   }
 
   return *this;
-
-  // return evolve(generations - 1);
 }

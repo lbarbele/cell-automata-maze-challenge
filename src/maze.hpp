@@ -17,8 +17,8 @@ private:
   void set_cell(const Position& p) {set_cell(p.x, p.y);}
   void clear_cell(const std::size_t idx);
   void clear_cell(const std::size_t i, const std::size_t j) {clear_cell(i*cols + j);}
-  void clear_cell(const Position& p) {clear_cell(p.x, p.y);}  
-  
+  void clear_cell(const Position& p) {clear_cell(p.x, p.y);}
+
   struct Cell {
     static const cell_t dead = 0;
     static const cell_t live = 1;
@@ -43,12 +43,7 @@ public:
 template <class CharT, class Traits>
 std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, const Maze& m) {
-  for (std::size_t i = 0; i < m.rows*m.cols; ++i) {
-    os << std::setw(2) << m.config[i]%2;
-    if ((i+1)%m.cols == 0)
-      os << std::endl;
-  }
-  return os;
+  return os << (m.config&1);
 }
 
 #endif // _has_maze_hpp_
