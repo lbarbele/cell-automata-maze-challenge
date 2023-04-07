@@ -16,6 +16,10 @@ namespace utl {
 
   private: // data fields
     matrix<cell_t> _config;
+    cell_t _rule_underpop  = 3; // cell count representing underpopulation
+    cell_t _rule_overpop   = 6; // cell count representing overpopulation
+    cell_t _rule_repro_min = 2; // minimum cell count for reproduction
+    cell_t _rule_repro_max = 4; // maximum cell count for reproduction
 
     static const cell_t _dead_cell     = 0b000;
     static const cell_t _live_cell     = 0b001;
@@ -23,6 +27,14 @@ namespace utl {
     static const cell_t _count_padding = 0b100;
 
   private: // methods
+
+    // rules checker
+
+    bool
+    _check_rules()
+    {
+      return _rule_repro_max >= _rule_repro_min && _rule_underpop < _rule_overpop;
+    }
 
     // cell updater
 
@@ -164,6 +176,28 @@ namespace utl {
     bool is_alive(const position& p) {return _config[p] & _live_cell;}
     bool is_alive(const std::size_t idx) {return _config[idx] & _live_cell;}
 
+    // rule setters
+
+    void set_overpopulation_rule(const cell_t value) {
+      _rule_overpop = value;
+    }
+
+    void set_underpopulation_rule(const cell_t value) {
+      _rule_underpop = value;
+    }
+
+    void set_reproduction_rules(
+      const cell_t min,
+      const cell_t max
+    ) {
+      if (max < min) {
+        throw std::runtime_error("bad reproduction rule: max < min");
+      }
+
+      _rule_repro_min = min;
+      _rule_repro_max = max;
+    }
+
     // get neighbour positions of given cell
 
     position_list
@@ -192,17 +226,25 @@ namespace utl {
       const uint generations = 1
     )
     {
+      // before applying the propagation rules, check them
+      if (!_check_rules()) {
+        throw std::runtime_error("invalid propagation rules!");
+      }
+
+      // loop over generations
       for (uint i = 0; i < generations; ++i) {
+        // create a copy of the current configuration
         auto m = matrix<cell_t>(config());
 
+        // iterate over all cells, applying the propagation rules to all
         for (std::size_t idx = 0; idx < size(); ++idx) {
           const auto count = m[idx] / _count_padding;
 
           if (is_alive(idx)) {
-            if (count <= 3 || count >= 6)
+            if (count <= _rule_underpop || count >= _rule_overpop)
               clear_cell(idx);
           } else {
-            if (1 < count && count < 5)
+            if (_rule_repro_min <= count && count <= _rule_repro_max)
               set_cell(idx);
           }
         }
