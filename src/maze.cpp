@@ -1,4 +1,5 @@
 #include <exception>
+#include <list>
 
 #include "matrix.hpp"
 #include "maze.hpp"
@@ -6,65 +7,27 @@
 Maze::Maze(
   const Maze& other
 ) :
-  _end_pos(other.end_pos),
-  _start_pos(other.start_pos),
   _config(other.config)
 {}
 
 Maze::Maze(
   const Matrix<cell_t>& m
 ) :
-  _end_pos({0, 0}),
-  _start_pos({0, 0}),
   _config(Matrix<cell_t>::full(m.rows, m.cols, Cell::dead))
 {
-  bool has_start = false;
-  bool has_end = false;
-
-  // loop over cells to check and search for start/end cells
+  // loop over matrix elements to get the initial configuration
   for (std::size_t i = 0; i < rows; ++i) {
     for (std::size_t j = 0; j < cols; ++j) {
-      const auto idx = i*cols + j;
-      switch (m[idx]) {
-        case Cell::dead:
-          break;
-        case Cell::live:
-          set_cell(idx);
-          break;
-        case Cell::start:
-          if (!has_start) {
-            _start_pos = {i, j};
-            has_start = true;
-          } else {
-            throw std::runtime_error("matrix has multiple starting cells");
-          }
-          break;
-        case Cell::end:
-          if (!has_end) {
-            _end_pos = {i, j};
-            has_end = true;
-          } else {
-            throw std::runtime_error("matrix has multiple ending cells");
-          }
-          break;
-        default:
-          throw std::runtime_error("invalid cell type " + std::to_string(m[{i, j}]));
+      // set cell state
+      if (m[{i, j}] == Cell::live) {
+        set_cell(i, j);
       }
 
-      // set the border bit
+      // enable the border bit for the border cells
       if (i == 0 || i == rows - 1 || j == 0 || j == cols - 1) {
-        _config[idx] |= 2;
+        _config[{i, j}] |= 2;
       }
     }
-  }
-
-  // check start/end cells
-  if (!has_start) {
-    throw std::runtime_error("matrix does not contain a starting cell");
-  }
-
-  if (!has_end) {
-    throw std::runtime_error("matrix does not contain an ending cell");
   }
 }
 
@@ -187,21 +150,5 @@ Maze::evolve()
     }
   }
 
-  // restore start/end cells in case they have changed
-  if (_config[start_pos] & Cell::live) {
-    clear_cell(end_pos);
-  }
-
-  if (_config[end_pos] & Cell::live) {
-    clear_cell(end_pos);
-  }
-
   return *this;
-}
-
-void
-Maze::solve()
-const
-{
-  auto maze = (*this);
 }

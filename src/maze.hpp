@@ -10,8 +10,6 @@ using cell_t = std::uint16_t;
 
 class Maze {
 private:
-  Position _end_pos;
-  Position _start_pos;
   Matrix<cell_t> _config;
 
   void set_cell(const std::size_t idx);
@@ -33,8 +31,6 @@ public:
   const Matrix<cell_t>& config = _config;
   const std::size_t& rows = config.rows;
   const std::size_t& cols = config.cols;
-  const Position& end_pos = _end_pos;
-  const Position& start_pos = _start_pos;
 
   Maze(const Maze& other);
   Maze(const Matrix<cell_t>& m);
@@ -43,7 +39,6 @@ public:
   {return Maze(Matrix<cell_t>::from_file(path));}
 
   Maze& evolve();
-  void solve() const;
 };
 
 // maze printer
