@@ -6,9 +6,10 @@
 #include "matrix.hpp"
 #include "position.hpp"
 
-using cell_t = std::uint16_t;
-
 class Maze {
+public:
+  using cell_t = std::uint32_t;
+
 private:
   Matrix<cell_t> _config;
 
