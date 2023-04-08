@@ -33,7 +33,7 @@ main(
 
   // configuration
   const uint max_steps = 10000;
-  const std::size_t drop_dist = 500;
+  const std::size_t drop_dist = 200;
   const bool verbose = true;
 
 
