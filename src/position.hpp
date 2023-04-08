@@ -49,6 +49,19 @@ namespace utl {
     return os << "(" << p.x << ", " << p.y << ")";
   }
 
+  // position_list printer
+
+  template <class CharT, class Traits>
+  std::basic_ostream<CharT, Traits>&
+  operator<<(
+    std::basic_ostream<CharT, Traits>& os,
+    const position_list& l
+  ) {
+    for (const auto & p : l) os << p << std::endl;
+    return os;
+  }
+
+
 } // utl
 
 #endif // _has_position_hpp_
