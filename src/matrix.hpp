@@ -175,6 +175,23 @@ namespace utl {
     
     auto operator-() const
     {return apply([](const auto& x){return -x;});}
+
+    // comparison operators
+
+    auto operator==(const matrix& other) {
+      if (rows() != other.rows() || cols() != other.cols())
+        return false;
+      
+      for (std::size_t i = 0; i < size(); ++i)
+        if ((*this)[i] != other[i])
+          return false;
+
+      return true;
+    }
+
+    auto operator!=(const matrix& other)
+    {return !this->operator==(other);}
+
   };
 
   // matrix printer function
