@@ -114,7 +114,7 @@ namespace utl {
             continue;
           }
 
-          if (maze.is_alive()) {
+          if (maze.is_alive(pos)) {
             // if position leads to a live cell and lives > 1, step on it
             if (cur_path->get_lives() > 1) {
               auto move = cur_path->walk(pos, cur_path->get_lives() - 1);
