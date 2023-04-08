@@ -1,10 +1,14 @@
 #ifndef _has_solve_maze_hpp_
 #define _has_solve_maze_hpp_
 
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
+#include <list>
 
 #include "cell_maze.hpp"
+#include "matrix.hpp"
+#include "path.hpp"
 #include "position.hpp"
 
 namespace utl {
