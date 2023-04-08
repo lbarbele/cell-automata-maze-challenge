@@ -73,7 +73,9 @@ namespace utl {
     // this is the list of all paths up to the given step
     std::list<path_t::ptr_t> all_paths = {path_t::create(start_pos)};
 
+    // walk up to max_steps steps
     for (uint istep = 1; istep < max_steps; ++istep) {
+
       // update the maze for the current step
       maze.evolve();
 
@@ -81,7 +83,7 @@ namespace utl {
       maze.clear_cell(start_pos);
       maze.clear_cell(end_pos);
 
-      // list with the available paths in the next step
+      // list with the paths that will be available in the next step
       std::list<path_t::ptr_t> next_all_paths;
 
       // keep track of the positions already reached in the current step
@@ -90,24 +92,33 @@ namespace utl {
       // keep track of the shortest distance to the end cell
       std::size_t shortest_distance = maze.rows() + maze.cols();
 
+      // loop over all paths with the current number of steps
       for (auto& cur_path : all_paths) {
+
+        // loop over all possible moves
         const auto moves = maze.get_neighbours(cur_path->get_position());
         for (const auto& pos : moves) {
 
-          // if the current path leads to the end cell
+          // if the current path leads to the end cell, we are done
           if (pos == end_pos) {
-            return cur_path->walk(pos)->get_position_list();
+            auto solution = cur_path->walk(pos);
+            return solution->get_position_list();
           }
 
           const auto dist = pos.distance(end_pos);
           shortest_distance = std::min(dist, shortest_distance);
 
           // add all possible moves to the path list
-          if ((maze[pos] == 0) && (occupation[pos] == 0)) {
+          if (!maze.is_alive(pos) && !occupation[pos]) {
             auto move = cur_path->walk(pos);
             next_all_paths.push_back(move);
             ++occupation[pos];
           }
+        }
+
+        // drop the current path, in case it leads to nowhere
+        if (cur_path->get_next().empty()) {
+          cur_path->drop();
         }
       }
 
