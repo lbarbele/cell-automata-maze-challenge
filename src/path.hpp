@@ -16,6 +16,7 @@ namespace utl {
   private: // data fields
     pos_t _position;
     ptr_t _previous;
+    uint _lives;
     std::list<ptr_t> _next;
 
   private: // constructors are private: must use factory instead
@@ -29,11 +30,13 @@ namespace utl {
     // path factory
 
     static ptr_t create(
-      const pos_t position
+      const pos_t position,
+      const uint lives = 1
     )
     {
       auto raw_ptr = new path();
       raw_ptr->_position = position;
+      raw_ptr->_lives = lives;
       return ptr_t(raw_ptr);
     }
 
@@ -44,16 +47,21 @@ namespace utl {
 
     // walk towards the given position
 
-    ptr_t walk(const pos_t pos)
+    ptr_t walk(
+      const pos_t pos,
+      const uint lives = 0
+    )
     {
       auto s = create(pos);
       s->_previous = get_ptr();
+      s->_live = lives == 0 ? get_lives() : lives;
       _next.push_back(s);
       return s;
     }
 
     // data access
 
+    const auto get_lives() const {return _lives;}
     const auto get_next() const {return _next;}
     const auto get_position() const {return _position;}
     const auto get_previous() const {return _previous;}

@@ -61,6 +61,7 @@ namespace utl {
     const utl::position& start_pos,
     const utl::position& end_pos,
     const uint max_steps,
+    const uint lives = 1,
     const std::size_t drop_distance = 100,
     const bool verbose = true
   )
@@ -108,8 +109,20 @@ namespace utl {
           const auto dist = pos.distance(end_pos);
           shortest_distance = std::min(dist, shortest_distance);
 
-          // add all possible moves to the path list
-          if (!maze.is_alive(pos) && !occupation[pos]) {
+          // if the cell is already occupied, skip it
+          if (occupation[pos]) {
+            continue;
+          }
+
+          if (maze.is_alive()) {
+            // if position leads to a live cell and lives > 1, step on it
+            if (cur_path->get_lives() > 1) {
+              auto move = cur_path->walk(pos, cur_path->get_lives() - 1);
+              next_all_paths.push_back(move);
+              ++occupation[pos];
+            }
+          } else {
+            // paths leads to a dead cell
             auto move = cur_path->walk(pos);
             next_all_paths.push_back(move);
             ++occupation[pos];
