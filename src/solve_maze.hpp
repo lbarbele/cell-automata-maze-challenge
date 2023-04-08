@@ -3,8 +3,12 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <exception>
 #include <iostream>
 #include <list>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "cell_maze.hpp"
 #include "matrix.hpp"
@@ -12,6 +16,43 @@
 #include "position.hpp"
 
 namespace utl {
+
+  std::string
+  solution_to_string(
+    const position_list& solution
+  )
+  {
+    // convert list to vectors
+    std::vector<position> v(solution.begin(), solution.end());
+
+    std::stringstream ss;
+
+    // walk through the solution to convert into step strings
+    for (std::size_t i = 1; i < v.size(); ++i) {
+      const auto& cur = v[i];
+      const auto& prv = v[i-1];
+
+      if (cur.x == prv.x + 1)
+        ss << "D ";
+      else if (cur.x + 1 == prv.x)
+        ss << "U ";
+      else if (cur.y == prv.y + 1)
+        ss << "R ";
+      else if (cur.y + 1 == prv.y)
+        ss << "L ";
+      else
+        throw std::runtime_error("invalid solution");
+    }
+
+    // convert to string
+    auto str = ss.str();
+
+    // remove training space
+    if (str.back() == ' ')
+      str.pop_back();
+
+    return str;
+  }
 
   template <class T>
   position_list
