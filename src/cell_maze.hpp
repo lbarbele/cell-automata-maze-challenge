@@ -189,6 +189,14 @@ namespace utl {
     auto operator[](const position& p) const {return config()[p] & _live_cell;}
     auto operator[](const std::size_t idx) const {return config()[idx] & _live_cell;}
 
+    // retrive matrix of cell states
+
+    auto states() const {return config()&_live_cell;}
+
+    // retrive matrix of neighbour counts
+
+    auto neighbour_count() const {return config()/_count_padding;}
+
     // cell setter
 
     void set_cell(const std::size_t idx) {_update_cell(idx, _live_cell);}
