@@ -54,7 +54,7 @@ namespace utl {
     {
       auto s = create(pos);
       s->_previous = get_ptr();
-      s->_live = lives == 0 ? get_lives() : lives;
+      s->_lives = lives == 0 ? get_lives() : lives;
       _next.push_back(s);
       return s;
     }
