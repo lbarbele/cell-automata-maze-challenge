@@ -34,6 +34,7 @@ main(
   // configuration
   const uint max_steps = 10000;
   const std::size_t drop_dist = 200;
+  const uint lives = 1;
   const bool verbose = true;
 
 
@@ -45,7 +46,7 @@ main(
   const utl::position end_pos = {maze.rows()-1, maze.cols()-1};
 
   // solve the maze
-  const auto solution = utl::solve_maze(maze, start_pos, end_pos, max_steps, drop_dist, verbose);
+  const auto solution = utl::solve_maze(maze, start_pos, end_pos, max_steps, lives, drop_dist, verbose);
 
   // convert solution to steps
   const auto steps = utl::solution_to_string(solution);
