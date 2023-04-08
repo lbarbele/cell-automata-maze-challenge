@@ -57,6 +57,12 @@ main(
   char** argv
 )
 {
+  if (argc != 2) {
+    std::cout << "bad input" << std::endl;
+    std::cout << "usage: ./lvl1_pt1 <data_path>" << std::endl;
+    return 1;
+  }
+
   const utl::position_list initial_live_cells = {
     {1, 4},
     {2, 2}, {2, 4}, {2, 5},
